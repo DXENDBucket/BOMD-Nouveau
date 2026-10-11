@@ -8,7 +8,9 @@ https://github.com/barribob/bosses-of-mass-destruction
 https://github.com/CERBON-MODS/Bosses-of-Mass-Destruction-FORGE
 
 Native projectile callbacks are adapted for Ars invocation in
-dev.bomdnouveau.casting.NativePayloads. Changes: caller/target geometry,
+dev.bomdnouveau.casting.NativePayloads. GroundEffects additionally adapts
+Obsidilith BurstAction, WaveAction and SpikeAction timing and placement,
+and invokes native RiftBurst / WallTeleport. Changes: caller/target geometry,
 fixed hard-mode damage, Ars amplification, payment and world lifecycle.
 The native mod is a separately installed dependency, not bundled here.
 Its textures/models/sounds are referenced at runtime, not redistributed.

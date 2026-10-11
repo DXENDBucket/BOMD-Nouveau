@@ -7,6 +7,8 @@ text and the GPL v3 text it incorporates accompany binary and source JARs.
   CerbonXD. LGPL v3. [Port source and license](https://github.com/CERBON-MODS/Bosses-of-Mass-Destruction-FORGE).
   Audited against NeoForge 1.3.3; source snapshot `1a7bd955d201d1b4d066157b8335cd967677e209`.
   Native callbacks in `NativePayloads` adapt `VolleyAction` / `CometAction`.
+  `GroundEffects` adapts Obsidilith `BurstAction` / `WaveAction` / `SpikeAction`
+  orchestration and invokes native `RiftBurst` / `WallTeleport` helpers.
   Modifying interfaces and native impact hooks does not alter ordinary Boss projectiles.
 - **Ars Conflux**: EndXiom, MIT. Separately installed dependency. This addon
   uses its public carrier, execution, context, resource and presentation APIs.

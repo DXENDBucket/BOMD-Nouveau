@@ -1,0 +1,16 @@
+{
+  "type": "ars_nouveau:glyph",
+  "exp": 27,
+  "output": {
+    "id": "bomd_nouveau:glyph_fire_wave",
+    "count": 1
+  },
+  "inputs": [
+    {
+      "item": "bosses_of_mass_destruction:obsidian_heart"
+    },
+    {
+      "item": "ars_nouveau:source_gem"
+    }
+  ]
+}

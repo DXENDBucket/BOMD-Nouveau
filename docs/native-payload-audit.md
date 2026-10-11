@@ -1,4 +1,4 @@
-# Native payload audit — 0.1.0-dev.1
+# Native payload audit — 0.1.0-dev.3
 
 Target: installed BOMD NeoForge 1.3.3, source snapshot
 `1a7bd955d201d1b4d066157b8335cd967677e209`.
@@ -42,8 +42,8 @@ their 30-tick result and a 100-tick safety cleanup; native rifts cancel if the o
 
 ## Version and verification scope
 
-Only 1.21.1 NeoForge is implemented in this first batch. Four projectile replacements
-and two effects have native Scribe recipes and English/Chinese localization. Glyphs
+Only 1.21.1 NeoForge is implemented. Four projectile replacements
+and six effects have native Scribe recipes and English/Chinese localization. Glyphs
 are grouped through Core after normal Ars glyphs; projectile modifiers remain at the
 end of this provider's augments. Native icons are referenced, not copied.
 
@@ -98,3 +98,37 @@ Iron spell constructors and power/cost formulas; Goety 3.2.0 Soul Bolt source an
 test-profile spell config; installed Minecraft ExplosionDamageCalculator and poison
 effect source. This balance-only revision uses compilation and artifact checks;
 the three runtime tests remain the dev.1 baseline and are not rerun for price changes.
+
+## Obsidilith effects and earthdive — dev.3
+
+`GroundEffects` adapts the native action orchestration without creating a Boss:
+
+- Burst uses the native filled radius-7 disk, 30-tick warning, burst particles/sounds,
+  shield-piercing damage and vertical launch. Wave uses native lineCallback geometry,
+  radius-4 disks, a 20-tick initial delay, 8-tick spacing and 20-tick column warning.
+- Wave retains the actual native ignition value of **5 ticks**, not five seconds.
+  This is a very brief ignition; changing it to several seconds would alter balance.
+- Spikes retain three rounds beginning at ticks 30/60/90, each with a 20-tick warning,
+  radius-2 ground coverage and 120-tick Slowness III. Entity selections follow current
+  position plus ten ticks of velocity, capped at six blocks; a block selection stays
+  fixed. This replaces Boss-specific ServerPlayer history prediction to support mobs.
+- Native RiftBurst still supplies the ground columns and effects. Its default 14-block
+  upward search / 28-block height tolerance is reproduced through its custom placement
+  constructor, adding caster and chunk guards. Damage uses the explicit damage owner,
+  while the caster remains the excluded actor and lifetime owner. Default raw damage
+  is 16 x 1.5 = 24, plus configured Harm amplification. Non-player launch is added.
+- An activation charges once for its complete native attack sequence. Subsequent Ars
+  hits activate and charge separate sequences; creative casters are exempt. No added
+  chant/cooldown. Defaults are 200/300/240 Mana, plus the configured Amplify surcharge.
+- Earthdive selects a living entity or falls back to the caster. Self selection uses
+  that caster's facing; otherwise incoming trajectory direction takes priority, then
+  the direction from caster to hit. Native WallTeleport chooses an exit, with additional
+  bounding-box collision, loaded-path and world-border checks. It supports player and
+  creature teleportation, does not damage walls and charges 100 only on success.
+  Its icon/recipe use the native earthdive spear; attacks use the obsidian heart.
+
+The added focused server case checks actual delayed burst damage/launch, all three
+spike hits and slow, captured wave direction, full-sequence payment, player/creature
+wall teleportation, bedrock rejection, failed-cast nonpayment and creative exemption.
+Native client particles/sounds are dispatched; client appearance still needs manual
+inspection. No Void Blossom spike renderer or Boss-only client actor is used here.

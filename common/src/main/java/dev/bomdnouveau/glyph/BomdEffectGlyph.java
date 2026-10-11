@@ -10,6 +10,7 @@ import dev.arsconflux.api.resource.ResourceCharge;
 import dev.bomdnouveau.api.Ability;
 import dev.bomdnouveau.casting.BomdResources;
 import dev.bomdnouveau.casting.NativePayloads;
+import dev.bomdnouveau.casting.GroundEffects;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
@@ -22,12 +23,14 @@ public final class BomdEffectGlyph extends AbstractEffect implements TriggerPaid
     public BomdEffectGlyph(Ability ability) {
         super(CarrierRegistry.id("bomd_nouveau:glyph_" + ability.id), ability.name);
         this.ability = ability;
+        if (ability == Ability.EARTHDIVE) compatibleAugments = new java.util.HashSet<>();
     }
     @Override public void onResolve(HitResult hit, Level level, LivingEntity ignoredCaster, SpellStats stats, SpellContext context, SpellResolver resolver) {
         if (!(level instanceof ServerLevel world) || !isEnabled()) return;
         var frame = CastContext.of(context, hit, null);
         if (frame.caster() == null || !frame.caster().isAlive()) return;
         firstCharge(context, stats.getAugments()).trigger(() -> {
+            if (ability.groundEffect()) return GroundEffects.trigger(ability, world, frame, stats.getAmpMultiplier());
             NativePayloads.impact(ability.payload(), world, frame, hit, NativePayloads.damage(ability.payload(), stats.getAmpMultiplier()), stats.getAmpMultiplier());
             return true;
         });
@@ -38,6 +41,7 @@ public final class BomdEffectGlyph extends AbstractEffect implements TriggerPaid
     @Override public SpellTier defaultTier() { return SpellTier.ONE; }
     @Override protected Set<AbstractAugment> getCompatibleAugments() { return Set.of(AugmentAmplify.INSTANCE, AugmentDampen.INSTANCE); }
     @Override public void addAugmentDescriptions(java.util.Map<AbstractAugment, String> descriptions) {
+        if (ability == Ability.EARTHDIVE) return;
         descriptions.put(AugmentAmplify.INSTANCE, "Increases damage for spores or explosion strength for comets.");
         descriptions.put(AugmentDampen.INSTANCE, "Decreases damage for spores or explosion strength for comets.");
     }

@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.0-dev.3
+
+- Add Obsidian Burst, Fire Wave, Obsidian Spikes and Earthdive effect glyphs, native Scribe recipes and English/Chinese descriptions.
+- Reuse native RiftBurst ground placement, indicators, columns and sounds with hard-mode Obsidilith damage and Harm amplification. Retain native wave timing and three spike rounds; support living targets using bounded velocity prediction.
+- Apply launch motion to non-player victims as well as native player motion packets; retain native short wave ignition and spike Slowness III.
+- Reuse native WallTeleport for player and creature earthdive, with loaded-chunk, collision and border checks. Failed teleports do not charge Mana. Earthdive has no damage augments.
+- Default full-sequence Mana costs: burst 200, wave 300, spikes 240 and earthdive 100; all configurable.
+- Four focused server GameTests passed with Iron / Goety coexistence; verify all ten recipes, icon references and licensed source/binary artifacts. Native client appearance remains subject to in-game inspection.
+
 ## 0.1.0-dev.2
 
 - Raise both Lich Comet and Comet Burst default payload costs to 300 Mana to account for their native area explosion damage and lack of added cast time/cooldown.

@@ -157,6 +157,64 @@ public final class PayloadGameTests {
             } finally {clean(h,p);p.discard();ExecutionSessions.tick();}
         });
     }
+    @GameTest(template="empty",batch="bmd_ground",timeoutTicks=340)
+    public static void groundAttacksAndWallTeleport(GameTestHelper h) {
+        var p=player(h); var mana=CapabilityRegistry.getMana(p); var origin=scene(h).add(.5,0,.5);
+        var burstVictim=mobileCow(h,origin);
+        effect(h,p,Ability.OBSIDIAN_BURST,block(origin),Vec3.ZERO);
+        close(h,mana.getCurrentMana(),10000-dev.bomdnouveau.platform.BomdConfig.cost(Ability.OBSIDIAN_BURST),"Burst prepays one native eruption");
+        h.runAfterDelay(45,()->{
+            close(h,burstVictim.getHealth(),476,"Native ground burst uses fixed hard-mode attack damage");
+            h.assertTrue(burstVictim.getY()>origin.y,"Burst launches a non-player victim");
+            burstVictim.discard();
+            var spikesVictim=mobileCow(h,origin);mana.setMana(10000);
+            effect(h,p,Ability.OBSIDIAN_SPIKES,new EntityHitResult(spikesVictim),Vec3.ZERO);
+            h.runAfterDelay(125,()->{
+                close(h,spikesVictim.getHealth(),428,"All three native pursuit rounds hit for 24 damage");
+                h.assertTrue(spikesVictim.hasEffect(MobEffects.MOVEMENT_SLOWDOWN) && spikesVictim.getEffect(MobEffects.MOVEMENT_SLOWDOWN).getAmplifier()==2,"Spike rounds retain Slowness III");
+                close(h,mana.getCurrentMana(),10000-dev.bomdnouveau.platform.BomdConfig.cost(Ability.OBSIDIAN_SPIKES),"Three-round effect is charged once");
+                spikesVictim.discard();
+                var waveVictim=mobileCow(h,origin.add(4,0,0));mana.setMana(10000);
+                effect(h,p,Ability.FIRE_WAVE,block(origin),new Vec3(1,0,0));
+                h.runAfterDelay(105,()->{
+                    h.assertTrue(waveVictim.getHealth()<500,"Wave uses the captured incoming direction and native ground columns");
+                    close(h,mana.getCurrentMana(),10000-dev.bomdnouveau.platform.BomdConfig.cost(Ability.FIRE_WAVE),"Wave sequence is charged once");
+                    waveVictim.discard();
+                    var base=BlockPos.containing(origin);
+                    for(int x=1;x<=2;x++)for(int y=0;y<=3;y++)for(int z=-2;z<=2;z++)h.getLevel().setBlock(base.offset(x,y,z),Blocks.STONE.defaultBlockState(),2);
+                    p.setPos(origin);p.setYRot(-90);p.setXRot(0);mana.setMana(10000);
+                    effect(h,p,Ability.EARTHDIVE,new EntityHitResult(p),Vec3.ZERO);
+                    h.assertTrue(p.getX()>base.getX()+3,"Self earthdive uses native wall search and actually teleports the player");
+                    close(h,mana.getCurrentMana(),10000-dev.bomdnouveau.platform.BomdConfig.cost(Ability.EARTHDIVE),"Successful teleport charges once");
+                    p.setPos(origin);
+                    for(int x=1;x<=2;x++)for(int y=0;y<=3;y++)for(int z=-2;z<=2;z++)h.getLevel().setBlock(base.offset(x,y,z),Blocks.BEDROCK.defaultBlockState(),2);
+                    double paid=mana.getCurrentMana();effect(h,p,Ability.EARTHDIVE,new EntityHitResult(p),Vec3.ZERO);
+                    close(h,p.getX(),origin.x,"Native unbreakable wall prevents teleport");close(h,mana.getCurrentMana(),paid,"Failed earthdive costs no mana");
+                    for(int x=1;x<=2;x++)for(int y=0;y<=3;y++)for(int z=-2;z<=2;z++)h.getLevel().setBlock(base.offset(x,y,z),Blocks.STONE.defaultBlockState(),2);
+                    p.setPos(origin.add(-8,0,0));var creature=cow(h,origin);
+                    effect(h,p,Ability.EARTHDIVE,new EntityHitResult(creature),new Vec3(1,0,0));
+                    h.assertTrue(creature.getX()>base.getX()+3 && p.getX()<origin.x,"Entity selection moves that creature rather than the caster");
+                    h.assertTrue(GlyphCatalog.EFFECTS.stream().filter(g->g.ability==Ability.EARTHDIVE).findFirst().orElseThrow().compatibleAugments.isEmpty(),"Earthdive does not advertise meaningless damage augments");
+                    p.setPos(origin);p.setGameMode(GameType.CREATIVE);mana.setMana(0);
+                    effect(h,p,Ability.EARTHDIVE,new EntityHitResult(p),Vec3.ZERO);
+                    h.assertTrue(p.getX()>base.getX()+3 && mana.getCurrentMana()==0,"Creative earthdive is free");
+                    clean(h,p);p.discard();ExecutionSessions.tick();h.succeed();
+                });
+            });
+        });
+    }
+    private static void effect(GameTestHelper h,ServerPlayer p,Ability ability,HitResult hit,Vec3 direction) {
+        var glyph=GlyphCatalog.EFFECTS.stream().filter(g->g.ability==ability).findFirst().orElseThrow();
+        var cast=resolver(h,p,new Spell(MethodTouch.INSTANCE,glyph));cast.spellContext.nextPart();
+        dev.arsconflux.api.context.TriggerGeometry.write(cast.spellContext,direction);
+        cast.onResolveEffect(h.getLevel(),hit);
+    }
+    private static LivingEntity mobileCow(GameTestHelper h,Vec3 position) {
+        var creature=(net.minecraft.world.entity.Mob)cow(h,position);
+        creature.setNoAi(false);creature.setNoGravity(false);
+        creature.goalSelector.removeAllGoals(goal->true);creature.targetSelector.removeAllGoals(goal->true);
+        return creature;
+    }
     private static final class Marker extends AbstractEffect {
         int hits;
         Marker(){super(CarrierRegistry.id("bomd_nouveau:glyph_test_marker"),"Marker");}

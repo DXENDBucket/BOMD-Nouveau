@@ -1,4 +1,4 @@
-"""Verify the six-glyph release, native references, licensing and artifact isolation."""
+"""Verify glyph recipes, native references, licensing and artifact isolation."""
 from pathlib import Path
 from zipfile import ZipFile
 import json
@@ -21,7 +21,7 @@ with ZipFile(root / 'libs/bomd.jar') as native:
             assert language[f'bomd_nouveau.glyph_name.{model.stem}']
             assert language[f'bomd_nouveau.glyph_desc.{model.stem}']
 recipes = list((resources / 'data/bomd_nouveau/recipe').glob('glyph_*.json'))
-assert len(recipes) == 6
+assert len(recipes) == 10
 binary = root / f'build/libs/bomd-nouveau-{version}-mc1.21.1-neoforge.jar'
 source = root / f'build/libs/bomd-nouveau-{version}-sources.jar'
 for artifact in (binary, source):
@@ -48,8 +48,8 @@ for artifact in (binary, source):
         else:
             assert 'dev/bomdnouveau/casting/NativePayloads.java' in names
 if '--artifacts-only' in sys.argv:
-    print(f'{version}: 6 glyph recipes, native icon references, localizations, licensing and source/binary isolation verified; runtime tests not rerun.')
+    print(f'{version}: 10 glyph recipes, native icon references, localizations, licensing and source/binary isolation verified; runtime tests not rerun.')
     sys.exit(0)
 log = (root / 'build/payload-tests.log').read_text(encoding='utf-16')
-assert 'All 3 required tests passed' in log and 'BUILD SUCCESSFUL' in log
-print(f'{version}: 6 glyph recipes, native icon references, both localizations, LGPL/GPL notices, source/binary isolation and 3 focused GameTests verified.')
+assert 'All 4 required tests passed' in log and 'BUILD SUCCESSFUL' in log
+print(f'{version}: 10 glyph recipes, native icon references, both localizations, LGPL/GPL notices, source/binary isolation and 4 focused GameTests verified.')

@@ -1,0 +1,16 @@
+{
+  "type": "ars_nouveau:glyph",
+  "exp": 27,
+  "output": {
+    "id": "bomd_nouveau:glyph_earthdive",
+    "count": 1
+  },
+  "inputs": [
+    {
+      "item": "bosses_of_mass_destruction:earthdive_spear"
+    },
+    {
+      "item": "ars_nouveau:source_gem"
+    }
+  ]
+}
