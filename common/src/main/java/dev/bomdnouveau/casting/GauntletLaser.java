@@ -98,7 +98,7 @@ public final class GauntletLaser implements ExecutionDriver<GauntletLaser.Pose> 
         var source = new DamageSource(session.world().registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(key), owner);
         for (var entity : BMDUtils.findEntitiesInLine(session.world(), lastOrigin, lastEnd, session.caster())) {
             if (entity instanceof LivingEntity victim && victim.isAlive() && !victim.isSpectator()
-                    && victim != pose.anchor() && !allied(session.caster(), victim)) victim.hurt(source, damage);
+                    && victim != pose.anchor() && !allied(session.caster(), victim)) dev.bomdnouveau.platform.ArsDamage.hurt(session.context(),victim,source,damage,victim::hurt);
         }
         return false;
     }

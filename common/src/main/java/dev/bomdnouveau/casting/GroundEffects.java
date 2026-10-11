@@ -104,7 +104,7 @@ public final class GroundEffects {
                                double lift, boolean burn, boolean slow) {
         var owner = context.damageOwner() == null ? context.caster() : context.damageOwner();
         var key = ResourceKey.create(Registries.DAMAGE_TYPE, CarrierRegistry.id("bomd_nouveau:shield_piercing"));
-        target.hurt(new DamageSource(world.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(key), owner), amount);
+        dev.bomdnouveau.platform.ArsDamage.hurt(context,target,new DamageSource(world.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(key), owner),amount,target::hurt);
         if (lift > 0) {
             var motion = new Vec3(target.getDeltaMovement().x, lift, target.getDeltaMovement().z);
             target.setDeltaMovement(motion); target.hasImpulse = true;

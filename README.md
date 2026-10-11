@@ -1,7 +1,7 @@
 # BOMD & Nouveau
 
 把 Bosses of Mass Destruction 的攻击能力编排为 Ars Nouveau 魔符。
-当前是 **0.1.0-dev.8**，支持 **Minecraft 1.21.1 / NeoForge** 和 **Minecraft 1.20.1 / Forge**。
+当前是 **0.1.0-dev.9**，支持 **Minecraft 1.21.1 / NeoForge** 和 **Minecraft 1.20.1 / Forge**。
 Mod ID：`bomd_nouveau`。作者 EndXiom，许可 **LGPL v3**。
 
 需要 Ars Nouveau、Ars Conflux 0.1.11，以及对应版本的 BOMD 和它们自己的前置。
@@ -86,10 +86,21 @@ NeoForge 使用 Java 21；Forge 使用 Java 17（Gradle 可以由 Java 21 启动
 `./gradlew :runGameTestServer` 运行本批服务端测试。
 
 Forge 构建在 `forge/` 中运行同样命令；本地依赖见 `forge/dependencies.lock.json`。
-`forge/build/libs/bomd-nouveau-0.1.0-dev.8-mc1.20.1-forge.jar` 为重映射安装产物。
+`forge/build/libs/bomd-nouveau-0.1.0-dev.9-mc1.20.1-forge.jar` 为重映射安装产物。
 魔符配方生成 Ars 4 的原生 `recipes/inputItems` 格式；两版的耗蓝、默认冷却和创造模式规则相同。
 运行 `python tools/verify_release.py --forge` 检查 Forge 产物与定向测试，`--artifacts-only` 可跳过读取运行测试结果。
 
 BOMD 作为单独依赖安装；本模组不打包其 JAR、贴图、模型或声音。
 构建产物附带 LGPL、GPL、来源及修改声明，发行时同时提供对应源码。
 详见 [原生行为审计](docs/native-payload-audit.md) 和 [第三方声明](THIRD_PARTY_NOTICES.md)。
+
+
+## Ars 伤害成长（dev.9）
+
+两版的联动伤害都接入 Ars `SPELL_DAMAGE_BONUS` 固定属性和 `SpellDamageEvent.Pre`／`Post`。每次原生伤害先加施法者的装备／药水属性，再交给 Pre；取消事件不造成伤害，事件可改伤害或来源，只有成功 hurt 发 Post。保留原生缓慢、中毒、穿盾、爆炸、无敌帧、伤害类型及既有强化，不改变费用／冷却或攻击数量。
+
+直接飞弹／花瓣、延迟孢子、三种地面攻击、巨拳激光与彗星爆炸都携带原始 Ars 上下文。爆炸仅在联动调用作用域内接入，普通爆炸和原生 Boss 攻击不变；环境火焰或后续药水中毒不重复读取法术伤害属性。属性在实际命中时读取，延迟与持续攻击使用当前施法者属性。
+
+无需 Iron 或 Ars ’n Spells；安装后者时按其原有 Ars 伤害事件桥接，不手动再叠一次 Iron 法强。NeoForge 的可选验证环境用 `-PwithArsSpells=true` 从忽略的 `libs/ars-growth` 读取本地依赖，不打包它们。该环境仅关闭魔力统一以维持测试池，伤害桥接启用；人工测试实例配置未改。
+
+NeoForge 和 Forge 的伤害规则共享设计。平台事件总线及属性 Holder 差异由既有 Forge 模板生成处理，新增代码不依赖 NeoForge 客户端类型。测试覆盖装备加成、一次事件修改／取消、延迟喷发、原生爆炸伤害源及作用域清理；孢子原生中毒可能继续扣血，因此测试核对 Post 的单次喷发伤害，不能把后续中毒算成重复加成。

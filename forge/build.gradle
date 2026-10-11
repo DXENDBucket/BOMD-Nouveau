@@ -64,6 +64,8 @@ def generateBridges = tasks.register('generateBridges') {
             'mixin/NativeStateMixin.java': ['protected void defineSynchedData(SynchedEntityData.Builder builder) { super.defineSynchedData(builder); builder.define(bomdNouveau$MODE, 0); }':'protected void defineSynchedData() { super.defineSynchedData(); getEntityData().define(bomdNouveau$MODE, 0); }'],
             'mixin/NativeDamageMixin.java': ['getAttributeValue(Lnet/minecraft/core/Holder;)D':'getAttributeValue(Lnet/minecraft/world/entity/ai/attributes/Attribute;)D'],
             'mixin/SporeDamageMixin.java': ['getAttributeValue(Lnet/minecraft/core/Holder;)D':'getAttributeValue(Lnet/minecraft/world/entity/ai/attributes/Attribute;)D'],
+            'platform/ArsDamage.java': ['net.neoforged.neoforge.common.NeoForge':'net.minecraftforge.common.MinecraftForge', 'NeoForge.EVENT_BUS':'MinecraftForge.EVENT_BUS', 'PerkAttributes.SPELL_DAMAGE_BONUS':'PerkAttributes.SPELL_DAMAGE_BONUS.get()'],
+            'mixin/NativeArsDamageMixin.java': [:], 'mixin/ArsExplosionDamageMixin.java': [:],
             'mixin/ManagedMovementMixin.java': [:], 'mixin/ManagedCometHurtMixin.java': [:], 'mixin/ProjectileHitAccess.java': [:]
         ]
         changes.each { path, replacements ->
@@ -89,6 +91,8 @@ def generateTestBridges = tasks.register('generateTestBridges') {
     doLast {
         def text = file('../src/gameTest/java/dev/bomdnouveau/PayloadGameTests.java').getText('UTF-8').replace('\r\n','\n')
         text = text.replace('net.neoforged.neoforge.gametest','net.minecraftforge.gametest')
+                .replace('net.neoforged.neoforge.common.NeoForge','net.minecraftforge.common.MinecraftForge')
+                .replace('PerkAttributes.SPELL_DAMAGE_BONUS','PerkAttributes.SPELL_DAMAGE_BONUS.get()')
                 .replace('CapabilityRegistry.getMana(p)', 'CapabilityRegistry.getMana(p).orElseThrow(IllegalStateException::new)')
                 .replace('GlyphCatalog.PROJECTILES.getFirst()', 'GlyphCatalog.PROJECTILES.get(0)')
         def start = text.indexOf('        var cookie = ')

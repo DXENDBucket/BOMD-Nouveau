@@ -364,6 +364,48 @@ public final class PayloadGameTests {
         creature.goalSelector.removeAllGoals(goal->true);creature.targetSelector.removeAllGoals(goal->true);
         return creature;
     }
+    @GameTest(template="empty",batch="bmd_ars_growth",timeoutTicks=120)
+    public static void arsEquipmentEventsCancelAndDelayedSpores(GameTestHelper h) {
+        var p=player(h);var target=cow(h,scene(h));
+        p.getAttribute(com.hollingsworth.arsnouveau.api.perk.PerkAttributes.SPELL_DAMAGE_BONUS).setBaseValue(6);
+        var r=resolver(h,p,new Spell(MethodTouch.INSTANCE,GlyphCatalog.PROJECTILES.get(0)));
+        var frame=CastContext.of(r.spellContext,new EntityHitResult(target),null);
+        int[] calls={0,0};boolean[] cancelled={false};float[] lastAmount={0};
+        java.util.function.Consumer<com.hollingsworth.arsnouveau.api.event.SpellDamageEvent.Pre> pre=e->{if(e.caster==p && e.target==target) {calls[0]++;if(cancelled[0])e.setCanceled(true);else e.damage*=1.5F;}};
+        java.util.function.Consumer<com.hollingsworth.arsnouveau.api.event.SpellDamageEvent.Post> post=e->{if(e.caster==p && e.target==target) {calls[1]++;lastAmount[0]=e.damage;}};
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(pre);net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(post);
+        try {
+            NativePayloads.impact(Ability.MISSILE,h.getLevel(),frame,new EntityHitResult(target),NativePayloads.damage(Ability.MISSILE,1),1);
+            close(h,500-target.getHealth(),(NativePayloads.damage(Ability.MISSILE,1)+6)*1.5,"Native missile receives equipment bonus and one external event modifier");
+            h.assertTrue(calls[0]==1 && calls[1]==1,"One Pre and successful Post for one direct hit");
+            target.setHealth(500);target.invulnerableTime=0;cancelled[0]=true;
+            NativePayloads.impact(Ability.PETAL,h.getLevel(),frame,new EntityHitResult(target),NativePayloads.damage(Ability.PETAL,0),0);
+            close(h,target.getHealth(),500,"Event cancellation prevents native blade damage");h.assertTrue(calls[0]==2 && calls[1]==1,"Cancelled blade has no Post");
+            cancelled[0]=false;
+            NativePayloads.impact(Ability.SPORE,h.getLevel(),frame,block(scene(h)),NativePayloads.damage(Ability.SPORE,0),0);
+        } catch(Throwable error) {net.neoforged.neoforge.common.NeoForge.EVENT_BUS.unregister(pre);net.neoforged.neoforge.common.NeoForge.EVENT_BUS.unregister(post);clean(h,p);p.discard();throw error;}
+        h.runAfterDelay(85,()->{try {
+            h.assertTrue(calls[0]>=3 && calls[1]>=2,"Delayed native spore explosion also carries the original Ars context");
+            close(h,lastAmount[0],(NativePayloads.damage(Ability.SPORE,0)+6)*1.5,"Delayed bloom receives equipment bonus once; subsequent native poison is separate");h.succeed();
+        } finally {net.neoforged.neoforge.common.NeoForge.EVENT_BUS.unregister(pre);net.neoforged.neoforge.common.NeoForge.EVENT_BUS.unregister(post);clean(h,p);p.discard();}});
+    }
+    @GameTest(template="empty",batch="bmd_ars_explosion",timeoutTicks=100)
+    public static void cometExplosionPreservesSourceAndBridgeContext(GameTestHelper h) {
+        var p=player(h);var target=cow(h,scene(h).add(1,0,0));
+        p.getAttribute(com.hollingsworth.arsnouveau.api.perk.PerkAttributes.SPELL_DAMAGE_BONUS).setBaseValue(6);
+        var r=resolver(h,p,new Spell(MethodTouch.INSTANCE,GlyphCatalog.PROJECTILES.get(0)));
+        var frame=CastContext.of(r.spellContext,block(scene(h)),null);int[] preCount={0},postCount={0};
+        java.util.function.Consumer<com.hollingsworth.arsnouveau.api.event.SpellDamageEvent.Pre> pre=e->{if(e.caster==p && e.target==target) {preCount[0]++;h.assertTrue(e.context==r.spellContext && e.damageSource.is(net.minecraft.tags.DamageTypeTags.IS_EXPLOSION),"Explosion keeps its native source and Ars context");}};
+        java.util.function.Consumer<com.hollingsworth.arsnouveau.api.event.SpellDamageEvent.Post> post=e->{if(e.caster==p && e.target==target)postCount[0]++;};
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(pre);net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(post);
+        try {
+            NativePayloads.impact(Ability.COMET,h.getLevel(),frame,block(scene(h)),0,0);
+            h.assertTrue(preCount[0]==1 && postCount[0]==1 && target.getHealth()<500,"Actual vanilla explosion passes through Ars once per target");
+            target.invulnerableTime=0;target.setHealth(500);h.getLevel().explode(p,scene(h).x,scene(h).y,scene(h).z,4,Level.ExplosionInteraction.NONE);
+            h.assertTrue(preCount[0]==1 && dev.bomdnouveau.platform.ArsDamage.explosion()==null,"Scope cleans immediately; ordinary explosions stay unchanged");
+            h.succeed();
+        } finally {net.neoforged.neoforge.common.NeoForge.EVENT_BUS.unregister(pre);net.neoforged.neoforge.common.NeoForge.EVENT_BUS.unregister(post);clean(h,p);p.discard();}
+    }
     private static final class Marker extends AbstractEffect {
         int hits;
         Marker(){super(CarrierRegistry.id("bomd_nouveau:glyph_test_marker"),"Marker");}

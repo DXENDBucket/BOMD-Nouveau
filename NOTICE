@@ -17,3 +17,5 @@ LaserVisuals adapts GauntletClientLaserHandler / LaserParticleRenderer geometry
 and invokes native VanillaCopies.renderBeam with the original beam texture.
 The native mod is a separately installed dependency, not bundled here.
 Its textures/models/sounds are referenced at runtime, not redistributed.
+
+Additional modifications (2026-10-12): Opt-in Ars equipment damage attributes and spell damage events for native payloads, explosions, ground attacks and laser hits; platform behavior generated for Forge. Native source types, effects and ordinary Boss attacks retained.

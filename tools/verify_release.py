@@ -66,6 +66,7 @@ for artifact in (binary, source):
 if '--artifacts-only' in sys.argv:
     print(f'{version}: 11 glyph recipes, native icon references, localizations, licensing and source/binary isolation verified; runtime tests not rerun.')
     sys.exit(0)
-log = (build_root / 'build/payload-tests.log').read_text(encoding='utf-16')
-assert 'All 6 required tests passed' in log and 'BUILD SUCCESSFUL' in log
-print(f'{version}: 11 glyph recipes, native icon references, both localizations, LGPL/GPL notices, source/binary isolation and 6 focused GameTests verified.')
+log_bytes = (build_root / 'build/payload-tests.log').read_bytes()
+log = log_bytes.decode('utf-16' if log_bytes.startswith((b'\xff\xfe', b'\xfe\xff')) else 'utf-8', errors='replace')
+assert 'All 8 required tests passed' in log and 'BUILD SUCCESSFUL' in log
+print(f'{version}: 11 glyph recipes, native icon references, both localizations, LGPL/GPL notices, source/binary isolation and 8 focused GameTests verified.')

@@ -40,7 +40,7 @@ public final class NativePayloads {
     }
     public static BaseThrownItemProjectile create(Ability ability, ServerLevel world, CastContext context, double amplify) {
         LivingEntity owner = context.damageOwner() != null ? context.damageOwner() : context.caster();
-        return switch (ability.payload()) {
+        var payload = switch (ability.payload()) {
             case MISSILE -> new MagicMissileProjectile(owner, world, target -> {
                 var config = BMDEntities.mobConfig.lichConfig.missile;
                 var id = CarrierRegistry.id(config.mobEffectId);
@@ -49,12 +49,13 @@ public final class NativePayloads {
             case PETAL -> new PetalBladeProjectile(owner, world, target -> {}, List.of(), 0);
             case COMET -> new CometProjectile(owner, world, point -> {
                 float strength = (float)Math.max(.1, BMDEntities.mobConfig.lichConfig.comet.explosionStrength + .5 * amplify);
-                world.explode(owner, point.x, point.y, point.z, strength,
-                        BomdConfig.terrainDamage() ? Level.ExplosionInteraction.MOB : Level.ExplosionInteraction.NONE);
+                dev.bomdnouveau.platform.ArsDamage.scoped(context, () -> world.explode(owner, point.x, point.y, point.z, strength,
+                        BomdConfig.terrainDamage() ? Level.ExplosionInteraction.MOB : Level.ExplosionInteraction.NONE));
             }, List.of());
             case SPORE -> new SporeBallProjectile(owner, world, hit -> hit.getEntity() != owner);
             default -> throw new IllegalArgumentException("Not a native projectile: " + ability);
         };
+        return dev.bomdnouveau.platform.ArsDamage.bind(payload,context);
     }
     /** Fresh payload per impact: repeated trajectories must not reuse a native 'already impacted' flag.
      * Landed spores are real native entities, so their flashing model survives the 30-tick delay. */

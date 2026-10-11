@@ -38,6 +38,8 @@ dependencies {
     implementation project(':ars-conflux')
     compileOnly fileTree(dir: 'libs', include: '*.jar')
     runtimeOnly fileTree(dir: 'libs', include: '*.jar')
+    if (providers.gradleProperty('withArsSpells').getOrElse('false').toBoolean())
+        runtimeOnly fileTree(dir: 'libs/ars-growth', include: '*.jar')
     if (providers.gradleProperty('coexistence').getOrElse('false').toBoolean())
         runtimeOnly fileTree(dir: 'libs/coexistence', include: '*.jar')
 }
