@@ -1,0 +1,36 @@
+{
+  "minecraft": "1.20.1",
+  "forge": "47.4.0",
+  "ars_conflux": "0.1.11",
+  "bomd_source_snapshot": "d53f326c0c0c536fc71856a8b5317ac9b2229fcd",
+  "jars": {
+    "ars-nouveau-forge1201.jar": {
+      "sha256": "1f1debc282a0c379c1141f2840ea294eede6f6b544c589663f40bbe17b59a1af",
+      "size": 12430237
+    },
+    "bomd-forge1201.jar": {
+      "sha256": "2b17c8333d2c63ee60ee3d316a2d75d5c19d581cbb7dce9f38a9931aab221188",
+      "size": 1753623
+    },
+    "cerbons-api-forge1201.jar": {
+      "sha256": "54a0a20da56ab1af2d0d7f5cf1133c059a7523485d567521084f822e81505dfb",
+      "size": 241148
+    },
+    "cloth-config-forge1201.jar": {
+      "sha256": "1e895e85cf5b1e1905ef3178ec155c8badfe22a1577b92c09143a5aa1f4ce0f2",
+      "size": 1181413
+    },
+    "curios-forge1201.jar": {
+      "sha256": "1e817919a35b37cf30524aaec73f0ca5130452f23f168f844854df282eb8e51f",
+      "size": 398066
+    },
+    "geckolib-forge1201.jar": {
+      "sha256": "4518779a31b6c2abb92c98b5ad17ef3d60177df68626bfc86c44de2764913c2b",
+      "size": 1038209
+    },
+    "patchouli-forge1201.jar": {
+      "sha256": "05f7b5d52f6b8f0fd7f8b4822fa07a192d1394d83a264309c9d221d6d4fd21c5",
+      "size": 642732
+    }
+  }
+}

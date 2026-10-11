@@ -44,8 +44,7 @@ public final class NativePayloads {
             case MISSILE -> new MagicMissileProjectile(owner, world, target -> {
                 var config = BMDEntities.mobConfig.lichConfig.missile;
                 var id = CarrierRegistry.id(config.mobEffectId);
-                BuiltInRegistries.MOB_EFFECT.getHolder(id).ifPresent(effect ->
-                        target.addEffect(new MobEffectInstance(effect, config.mobEffectDuration, config.mobEffectAmplifier), owner));
+                dev.bomdnouveau.platform.NativeEffects.apply(target, owner, id, config.mobEffectDuration, config.mobEffectAmplifier);
             }, List.of());
             case PETAL -> new PetalBladeProjectile(owner, world, target -> {}, List.of(), 0);
             case COMET -> new CometProjectile(owner, world, point -> {

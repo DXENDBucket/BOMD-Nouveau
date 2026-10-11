@@ -15,6 +15,10 @@ __pycache__/
 *.jfr
 .env
 .env.*
+forge/.gradle/
+forge/build/
+forge/run/
+forge/libs/
 *.key
 *.pem
 *.keystore

@@ -1,12 +1,14 @@
 # BOMD & Nouveau
 
 把 Bosses of Mass Destruction 的攻击能力编排为 Ars Nouveau 魔符。
-当前是 **0.1.0-dev.6，Minecraft 1.21.1 / NeoForge** 的可测试实现。
+当前是 **0.1.0-dev.7**，支持 **Minecraft 1.21.1 / NeoForge** 和 **Minecraft 1.20.1 / Forge**。
 Mod ID：`bomd_nouveau`。作者 EndXiom，许可 **LGPL v3**。
 
-需要 Ars Nouveau、Ars Conflux 0.1.11 和 BOMD NeoForge 1.3.3，以及它们自己的前置。
+需要 Ars Nouveau、Ars Conflux 0.1.11，以及对应版本的 BOMD 和它们自己的前置。
+NeoForge 使用 Ars 5.13.1 / BOMD 1.3.3；Forge 使用 Ars 4.12.7 / BOMD 1.1.2。
 Iron、Goety、Not Enough Glyphs、Hex Linker 均不是必需依赖。
-公共源码保存在 `common/`；当前尚未制作 1.20.1 Forge 发行包。
+公共施法、资源和冷却源码保存在 `common/`；加载器入口、网络和效果注册差异放在各自平台层。
+Forge 的小型 API 适配从现有模板生成，避免维护两份冷却策略。
 
 ## 首批魔符
 
@@ -72,10 +74,16 @@ Iron、Goety、Not Enough Glyphs、Hex Linker 均不是必需依赖。
 
 ## 构建与许可
 
-Java 21；相邻目录默认放置 Ars-Conflux 源码，也可用 `-PconfluxCheckout=...`。
+NeoForge 使用 Java 21；Forge 使用 Java 17（Gradle 可以由 Java 21 启动）。
+相邻目录默认放置 Ars-Conflux 源码，也可用 `-PconfluxCheckout=...`。
 将依赖放入本地 `libs/`，对应文件哈希见 `dependencies.lock.json`。
 `./gradlew :jar :sourcesJar` 生成二进制和对应源码发行包。
 `./gradlew :runGameTestServer` 运行本批服务端测试。
+
+Forge 构建在 `forge/` 中运行同样命令；本地依赖见 `forge/dependencies.lock.json`。
+`forge/build/libs/bomd-nouveau-0.1.0-dev.7-mc1.20.1-forge.jar` 已重映射，可直接安装。
+魔符配方生成 Ars 4 的原生 `recipes/inputItems` 格式；两版的耗蓝、默认冷却和创造模式规则相同。
+运行 `python tools/verify_release.py --forge` 检查 Forge 产物与定向测试，`--artifacts-only` 可跳过读取运行测试结果。
 
 BOMD 作为单独依赖安装；本模组不打包其 JAR、贴图、模型或声音。
 构建产物附带 LGPL、GPL、来源及修改声明，发行时同时提供对应源码。

@@ -5,7 +5,8 @@ text and the GPL v3 text it incorporates accompany binary and source JARs.
 
 - **Bosses of Mass Destruction**: barribob / miyo6032; Forge/NeoForge port:
   CerbonXD. LGPL v3. [Port source and license](https://github.com/CERBON-MODS/Bosses-of-Mass-Destruction-FORGE).
-  Audited against NeoForge 1.3.3; source snapshot `1a7bd955d201d1b4d066157b8335cd967677e209`.
+  Audited against NeoForge 1.3.3, source snapshot `1a7bd955d201d1b4d066157b8335cd967677e209`;
+  and Forge 1.1.2, source snapshot `d53f326c0c0c536fc71856a8b5317ac9b2229fcd`.
   Native callbacks in `NativePayloads` adapt `VolleyAction` / `CometAction`.
   `GroundEffects` adapts Obsidilith `BurstAction` / `WaveAction` / `SpikeAction`
   orchestration and invokes native `RiftBurst` / `WallTeleport` helpers.

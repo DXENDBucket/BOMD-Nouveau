@@ -1,0 +1,168 @@
+import groovy.json.JsonSlurper
+import groovy.json.JsonOutput
+
+plugins {
+    id 'java-library'
+    id 'net.minecraftforge.gradle' version '6.0.36'
+    id 'org.spongepowered.mixin' version '0.7.38'
+}
+group = 'dev.bomdnouveau'
+version = file('../VERSION').text.trim()
+base { archivesName = 'bomd-nouveau' }
+java { toolchain.languageVersion = JavaLanguageVersion.of(17); withSourcesJar() }
+repositories { flatDir { dirs 'libs' }; mavenCentral { content { excludeGroup 'local' } } }
+sourceSets.main { java.srcDir '../common/src/main/java' }
+sourceSets { gameTest { compileClasspath += sourceSets.main.output; runtimeClasspath += sourceSets.main.output } }
+configurations {
+    gameTestImplementation.extendsFrom implementation
+    gameTestCompileOnly.extendsFrom compileOnly
+    gameTestRuntimeOnly.extendsFrom runtimeOnly
+}
+evaluationDependsOn(':ars-conflux')
+def confluxMain = project(':ars-conflux').sourceSets.main
+minecraft {
+    mappings channel: 'official', version: '1.20.1'
+    copyIdeResources = true
+    runs {
+        configureEach {
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
+            args '--mixin.config', 'ars_conflux.mixins.json'
+            args '--mixin.config', 'bomd_nouveau.mixins.json'
+        }
+        client { workingDirectory project.file('run/client'); mods { ars_conflux { source confluxMain }; bomd_nouveau { source sourceSets.main } } }
+        server { workingDirectory project.file('run/server'); args '--nogui'; mods { ars_conflux { source confluxMain }; bomd_nouveau { source sourceSets.main } } }
+        gameTestServer {
+            workingDirectory project.file('run/gametest')
+            property 'forge.enabledGameTestNamespaces', 'bomd_nouveau'
+            jvmArgs '-Xmx2G'
+            mods { ars_conflux { source confluxMain }; bomd_nouveau { source sourceSets.main; source sourceSets.gameTest } }
+        }
+    }
+}
+dependencies {
+    minecraft 'net.minecraftforge:forge:1.20.1-47.4.0'
+    implementation project(':ars-conflux')
+    for (name in ['ars-nouveau','bomd','geckolib','curios','patchouli','cloth-config','cerbons-api']) {
+        implementation fg.deobf("local:${name}:forge1201")
+    }
+    compileOnly 'io.github.llamalad7:mixinextras-common:0.4.1'
+    annotationProcessor 'io.github.llamalad7:mixinextras-common:0.4.1'
+    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+}
+
+// Small API bridges are generated from Neo templates, keeping cooldown policy and visuals in sync.
+def bridges = layout.buildDirectory.dir('generated/bridges')
+def generateBridges = tasks.register('generateBridges') {
+    def templates = file('../src/main/java')
+    inputs.dir templates
+    outputs.dir bridges
+    doLast {
+        def changes = [
+            'platform/BomdConfig.java': ['net.neoforged.neoforge.common.ModConfigSpec':'net.minecraftforge.common.ForgeConfigSpec', 'ModConfigSpec':'ForgeConfigSpec'],
+            'client/LaserVisuals.java': ['net.neoforged.api.distmarker':'net.minecraftforge.api.distmarker', 'net.neoforged.bus.api':'net.minecraftforge.eventbus.api', 'net.neoforged.fml.common.EventBusSubscriber':'net.minecraftforge.fml.common.Mod.EventBusSubscriber', 'net.neoforged.neoforge.client.event.ClientTickEvent':'net.minecraftforge.event.TickEvent', 'net.neoforged.neoforge.client.event.RenderLevelStageEvent':'net.minecraftforge.client.event.RenderLevelStageEvent', 'ResourceLocation.fromNamespaceAndPath(':'new ResourceLocation(', 'ClientTickEvent.Post event':'TickEvent.ClientTickEvent event', 'var level = level();\n        if (level == null) return;':'if (event.phase != TickEvent.Phase.END) return;\n        var level = level();\n        if (level == null) return;', 'event.getPartialTick().getGameTimeDeltaPartialTick(false)':'event.getPartialTick()'],
+            'mixin/NativeStateMixin.java': ['protected void defineSynchedData(SynchedEntityData.Builder builder) { super.defineSynchedData(builder); builder.define(bomdNouveau$MODE, 0); }':'protected void defineSynchedData() { super.defineSynchedData(); getEntityData().define(bomdNouveau$MODE, 0); }'],
+            'mixin/NativeDamageMixin.java': ['getAttributeValue(Lnet/minecraft/core/Holder;)D':'getAttributeValue(Lnet/minecraft/world/entity/ai/attributes/Attribute;)D'],
+            'mixin/SporeDamageMixin.java': ['getAttributeValue(Lnet/minecraft/core/Holder;)D':'getAttributeValue(Lnet/minecraft/world/entity/ai/attributes/Attribute;)D'],
+            'mixin/ManagedMovementMixin.java': [:], 'mixin/ManagedCometHurtMixin.java': [:], 'mixin/ProjectileHitAccess.java': [:]
+        ]
+        changes.each { path, replacements ->
+            def text = new File(templates, "dev/bomdnouveau/${path}").getText('UTF-8').replace('\r\n','\n')
+            replacements.each { original, replacement ->
+                if (!text.contains(original)) throw new GradleException("Stale Forge bridge ${path}: ${original}")
+                text = text.replace(original, replacement)
+            }
+            def output = new File(bridges.get().asFile, "dev/bomdnouveau/${path}")
+            output.parentFile.mkdirs(); output.setText(text, 'UTF-8')
+        }
+    }
+}
+sourceSets.main.java.srcDir bridges
+tasks.named('compileJava') { dependsOn generateBridges }
+tasks.named('sourcesJar') { dependsOn generateBridges }
+
+def testBridges = layout.buildDirectory.dir('generated/test-bridges')
+def generateTestBridges = tasks.register('generateTestBridges') {
+    inputs.file '../src/gameTest/java/dev/bomdnouveau/PayloadGameTests.java'
+    inputs.file 'src/gameTest/fixtures/laser.java.txt'
+    outputs.dir testBridges
+    doLast {
+        def text = file('../src/gameTest/java/dev/bomdnouveau/PayloadGameTests.java').getText('UTF-8').replace('\r\n','\n')
+        text = text.replace('net.neoforged.neoforge.gametest','net.minecraftforge.gametest')
+                .replace('CapabilityRegistry.getMana(p)', 'CapabilityRegistry.getMana(p).orElseThrow(IllegalStateException::new)')
+                .replace('GlyphCatalog.PROJECTILES.getFirst()', 'GlyphCatalog.PROJECTILES.get(0)')
+        def start = text.indexOf('        var cookie = ')
+        def end = text.indexOf('        p.setGameMode(',start)
+        if (start < 0 || end < 0) throw new GradleException('Stale Forge player fixture bridge')
+        def fixture = '''        var p = new ServerPlayer(h.getLevel().getServer(),h.getLevel(),new com.mojang.authlib.GameProfile(UUID.randomUUID(),"BmdStudent"));
+        var connection = new net.minecraft.network.Connection(net.minecraft.network.protocol.PacketFlow.SERVERBOUND);
+        new io.netty.channel.embedded.EmbeddedChannel(connection);
+        p.connection = new net.minecraft.server.network.ServerGamePacketListenerImpl(h.getLevel().getServer(),connection,p) {
+            @Override public void send(net.minecraft.network.protocol.Packet<?> packet) {}
+            @Override public void send(net.minecraft.network.protocol.Packet<?> packet,net.minecraft.network.PacketSendListener listener) {}
+        };
+'''
+        text = text.substring(0,start) + fixture + text.substring(end)
+        text = text.replace('        h.getLevel().addNewPlayer(p);',
+                '        h.getLevel().addNewPlayer(p);\n        p.getAttribute(com.hollingsworth.arsnouveau.api.perk.PerkAttributes.MAX_MANA.get()).setBaseValue(9900);')
+        // Ars 4 has no wrapped-caster Mana methods. Use a real capability for the laser fixture.
+        def laserStart = text.indexOf('    @GameTest(template="empty",batch="bmd_laser"')
+        def laserEnd = text.indexOf('    @GameTest(template="empty",batch="bmd_cooldowns"',laserStart)
+        if (laserStart < 0 || laserEnd < 0) throw new GradleException('Stale Forge laser fixture bridge')
+        def laserFixture = file('src/gameTest/fixtures/laser.java.txt').getText('UTF-8')
+        text = text.substring(0,laserStart) + laserFixture + text.substring(laserEnd)
+        def helperStart = text.indexOf('    private static void laser(')
+        def helperEnd = text.indexOf('    private static void effect(',helperStart)
+        if (helperStart < 0 || helperEnd < 0) throw new GradleException('Stale Forge laser helper bridge')
+        text = text.substring(0,helperStart) + text.substring(helperEnd)
+        def output = new File(testBridges.get().asFile,'dev/bomdnouveau/PayloadGameTests.java')
+        output.parentFile.mkdirs(); output.setText(text,'UTF-8')
+    }
+}
+sourceSets.gameTest.java.srcDir testBridges
+tasks.named('compileGameTestJava') { dependsOn generateTestBridges }
+tasks.named('processGameTestResources') {
+    from('../src/gameTest/resources') { eachFile { details -> details.path = details.path.replace('/structure/','/structures/') } }
+}
+
+def generatedResources = layout.buildDirectory.dir('generated/resources')
+def generateResources = tasks.register('generateForgeResources') {
+    inputs.dir '../common/src/main/resources'
+    inputs.file '../src/main/resources/bomd_nouveau.mixins.json'
+    outputs.dir generatedResources
+    doLast {
+        fileTree('../common/src/main/resources').files.each { source ->
+            def relative = file('../common/src/main/resources').toPath().relativize(source.toPath()).toString().replace('\\','/')
+            if (!source.name.endsWith('.json')) {
+                def output = new File(generatedResources.get().asFile, relative)
+                output.parentFile.mkdirs(); output.bytes = source.bytes
+                return
+            }
+            def text = source.getText('UTF-8')
+            if (relative.startsWith('data/bomd_nouveau/recipe/')) {
+                def recipe = new JsonSlurper().parseText(text)
+                text = JsonOutput.prettyPrint(JsonOutput.toJson([type:recipe.type, exp:recipe.exp, output:recipe.output.id, count:recipe.output.count, inputItems:recipe.inputs.collect { [item:it] }])) + '\n'
+                relative = relative.replace('/recipe/','/recipes/')
+            }
+            def output = new File(generatedResources.get().asFile, relative)
+            output.parentFile.mkdirs(); output.setText(text,'UTF-8')
+        }
+        def config = new JsonSlurper().parse(file('../src/main/resources/bomd_nouveau.mixins.json'),'UTF-8')
+        config.compatibilityLevel = 'JAVA_17'; config.refmap = 'bomd_nouveau.refmap.json'
+        new File(generatedResources.get().asFile,'bomd_nouveau.mixins.json').setText(JsonOutput.prettyPrint(JsonOutput.toJson(config))+'\n','UTF-8')
+    }
+}
+sourceSets.main.resources.srcDir generatedResources
+tasks.named('processResources') { dependsOn generateResources; inputs.property 'version',project.version; filesMatching('META-INF/mods.toml') { expand(version:project.version) } }
+mixin { add sourceSets.main,'bomd_nouveau.refmap.json'; config 'bomd_nouveau.mixins.json' }
+tasks.withType(JavaCompile).configureEach { options.encoding = 'UTF-8' }
+tasks.named('jar') {
+    from('../LICENSE','../NOTICE','../THIRD_PARTY_NOTICES.md'); from('../licenses') { into 'licenses' }
+    archiveFileName = "bomd-nouveau-${project.version}-mc1.20.1-forge.jar"
+    manifest { attributes 'MixinConfigs':'bomd_nouveau.mixins.json' }
+    finalizedBy 'reobfJar'
+}
+tasks.named('sourcesJar') {
+    dependsOn generateResources
+    from('../LICENSE','../NOTICE','../THIRD_PARTY_NOTICES.md'); from('../licenses') { into 'licenses' }
+}

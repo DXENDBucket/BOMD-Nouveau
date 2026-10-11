@@ -1,4 +1,4 @@
-# Native payload audit — 0.1.0-dev.6
+# Native payload audit — 0.1.0-dev.7
 
 Target: installed BOMD NeoForge 1.3.3, source snapshot
 `1a7bd955d201d1b4d066157b8335cd967677e209`.
@@ -194,3 +194,24 @@ sharing, complete denial with no action/payment, passive repeated conversion,
 pure Ars isolation, keyed callback deduplication/drop on unacknowledged uses,
 failed Earthdive, two successful same-use branches, creative and global switches,
 and clock expiry. The shared Core callback API also compiles for Forge 1.20.1.
+
+## Forge 1.20.1 boundary
+
+Forge uses native BOMD 1.1.2 (source `d53f326c0c0c536fc71856a8b5317ac9b2229fcd`)
+and Ars 4.12.7. The 11 ability definitions, resource quotes, projectile driver,
+ground effects, laser driver and active cooldown provider stay shared.
+`NativeEffects` adapts raw effect values instead of 1.21 effect holders.
+Forge bridges generate entity-data initialization, Attribute invocation descriptors,
+Forge configuration/events and float partial ticks from the existing templates;
+changes are checked against exact source snippets so a stale bridge fails the build.
+Visual leases use a client-bound SimpleChannel with the same fields and lifetime.
+The client invokes the Forge native beam helper and particles without a proxy Boss.
+Recipes use native Ars 4 inputItems and plural recipes paths; release mixins carry
+a real refmap and reobfuscated Minecraft method descriptors. Dependencies remain
+separate, and binary/source artifacts include all existing LGPL/GPL notices.
+
+Forge reuses five Neo payload/ground/cooldown cases. The sixth uses the actual
+Ars 4 player Mana capability, testing native laser warm-up, wall occlusion,
+server-owned damage and upkeep depletion, instead of nonexistent wrapped-caster
+Mana overrides. Client rendering is compiled against the native Forge helper;
+these server checks do not claim manual visual verification.

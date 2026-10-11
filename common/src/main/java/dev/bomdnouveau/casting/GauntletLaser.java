@@ -94,7 +94,7 @@ public final class GauntletLaser implements ExecutionDriver<GauntletLaser.Pose> 
         if (age % 2 == 0) send(session, age > CHARGE_TICKS, 6);
         if (!damaging) return false;
         var owner = session.context().damageOwner() == null ? session.caster() : session.context().damageOwner();
-        var key = ResourceKey.create(Registries.DAMAGE_TYPE, ResourceLocation.fromNamespaceAndPath("bomd_nouveau", "gauntlet_laser"));
+        var key = ResourceKey.create(Registries.DAMAGE_TYPE, dev.arsconflux.api.projectile.CarrierRegistry.id("bomd_nouveau:gauntlet_laser"));
         var source = new DamageSource(session.world().registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(key), owner);
         for (var entity : BMDUtils.findEntitiesInLine(session.world(), lastOrigin, lastEnd, session.caster())) {
             if (entity instanceof LivingEntity victim && victim.isAlive() && !victim.isSpectator()

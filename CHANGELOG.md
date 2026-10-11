@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.0-dev.7
+
+- Add Minecraft 1.20.1 Forge / Ars 4 / BOMD 1.1.2 distribution with the same 11 glyphs, Conflux execution, trigger payment and active cooldown policy. Both platforms use one VERSION.
+- Adapt native entity sync, Minecraft attribute descriptors, effect registration, client event timing and visual packet transport. Keep native art, beam helper, impact callbacks and delayed spores.
+- Generate native Ars 4 Scribe recipes and mapped Forge mixins; include LGPL/GPL notices in both binary/source artifacts.
+- Reuse the focused payload/cooldown test cases with Forge-specific player and actual Ars capability laser fixtures.
+- Forge: all six focused server GameTests passed; native icons, all recipes, licensing, class targets, dependency isolation and release refmap verified. NeoForge rebuilt with unchanged shared casting policy; its runtime suite was not repeated for this port.
+
 ## 0.1.0-dev.6
 
 - Add a Conflux active-cast provider with persistent per-caster/per-glyph cooldowns. Defaults: missile/petal 2 s; comet variants 15 s; spore variants/burst 10 s; wave/spikes 12 s; Earthdive 5 s; laser 10 s.

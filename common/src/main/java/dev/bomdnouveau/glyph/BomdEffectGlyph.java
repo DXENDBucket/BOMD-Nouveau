@@ -45,7 +45,7 @@ public final class BomdEffectGlyph extends AbstractEffect implements TriggerPaid
     @Override public int getCastingCost() { return 0; }
     @Override public SpellTier defaultTier() { return SpellTier.ONE; }
     @Override protected Set<AbstractAugment> getCompatibleAugments() { return Set.of(AugmentAmplify.INSTANCE, AugmentDampen.INSTANCE); }
-    @Override public void addAugmentDescriptions(java.util.Map<AbstractAugment, String> descriptions) {
+    public void addAugmentDescriptions(java.util.Map<AbstractAugment, String> descriptions) {
         if (ability == Ability.EARTHDIVE) return;
         descriptions.put(AugmentAmplify.INSTANCE, "Increases damage for spores or explosion strength for comets.");
         descriptions.put(AugmentDampen.INSTANCE, "Decreases damage for spores or explosion strength for comets.");

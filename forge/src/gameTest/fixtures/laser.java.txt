@@ -1,0 +1,30 @@
+    @GameTest(template="empty",batch="bmd_laser",timeoutTicks=100)
+    public static void laserArs4CapabilityWarmupWallOwnershipAndDepletion(GameTestHelper h) {
+        var p=player(h);var origin=scene(h).add(.5,0,.5);p.setPos(origin);p.setYRot(-90);p.setXRot(0);
+        var mana=CapabilityRegistry.getMana(p).orElseThrow(IllegalStateException::new);
+        var victim=cow(h,origin.add(5,.7,0));var base=BlockPos.containing(origin);
+        for(int y=0;y<4;y++)for(int z=-1;z<=1;z++)h.getLevel().setBlock(base.offset(3,y,z),Blocks.STONE.defaultBlockState(),2);
+        effect(h,p,Ability.GAUNTLET_LASER,new EntityHitResult(p),Vec3.ZERO);
+        h.runAfterDelay(20,()->{
+            close(h,victim.getHealth(),500,"Ars 4 beam cannot damage during warm-up");
+            close(h,mana.getCurrentMana(),10000,"Warm-up spends no payload Mana");
+        });
+        h.runAfterDelay(35,()->{
+            close(h,victim.getHealth(),500,"Opaque wall blocks the active beam");
+            h.assertTrue(mana.getCurrentMana()<10000,"Active beam pays actual Ars 4 Mana");
+            for(int y=0;y<4;y++)for(int z=-1;z<=1;z++)h.getLevel().setBlock(base.offset(3,y,z),Blocks.AIR.defaultBlockState(),2);
+        });
+        h.runAfterDelay(40,()->{
+            h.assertTrue(victim.getHealth()<500,"Removing the wall exposes the actual native line hit");
+            h.assertTrue(victim.getLastDamageSource().getEntity()==p,"Actual caster owns beam damage");
+            mana.setMana(0);
+        });
+        h.runAfterDelay(65,()->{
+            float stopped=victim.getHealth();
+            h.runAfterDelay(15,()->{
+                close(h,victim.getHealth(),stopped,"Depleted upkeep stops further damage");
+                clean(h,p);p.discard();ExecutionSessions.tick();h.succeed();
+            });
+        });
+    }
+

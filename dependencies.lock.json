@@ -1,7 +1,7 @@
 {
   "minecraft": "1.21.1",
   "neoforge": "21.1.250",
-  "ars_conflux": "0.1.10",
+  "ars_conflux": "0.1.11",
   "jars": {
     "ars.jar": {
       "sha256": "45c1b6022d8e63464177c1f822bda22c3d6fb66970857fd7677e4e3ccffd259f",
