@@ -40,6 +40,7 @@
   "item.bomd_nouveau.glyph_earthdive": "地潜",
   "bomd_nouveau.glyph_name.glyph_earthdive": "地潜",
   "bomd_nouveau.glyph_desc.glyph_earthdive": "使自身或选中的友军沿触发方向穿过附近的墙壁；自身施法沿自身朝向。不可穿过不可破坏方块。",
+  "bomd_nouveau.cast.cooldown": "%s 尚在冷却（剩余 %s 秒）",
   "item.bomd_nouveau.glyph_gauntlet_laser": "巨拳激光",
   "bomd_nouveau.glyph_name.glyph_gauntlet_laser": "巨拳激光",
   "bomd_nouveau.glyph_desc.glyph_gauntlet_laser": "蓄力后持续扫射三秒，转向稍有延迟。自身或友军从眼部发射，位置触发使用入射方向。持续阶段逐秒消耗魔力，魔力不足即停止。墙体会截断光束，但不会被破坏。",

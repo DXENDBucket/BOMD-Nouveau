@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.0-dev.6
+
+- Add a Conflux active-cast provider with persistent per-caster/per-glyph cooldowns. Defaults: missile/petal 2 s; comet variants 15 s; spore variants/burst 10 s; wave/spikes 12 s; Earthdive 5 s; laser 10 s.
+- Deny the complete new active use before execution when any included glyph is cooling down; recipes/tools share deadlines and pure Ars recipes remain unaffected. Existing scatter branches, repeated carriers and ongoing attacks continue normally.
+- Commit normal cooldowns once per acknowledged active release. Earthdive commits only after successful teleport, using Conflux's keyed after-release callback so sibling synchronous branches remain eligible.
+- Add enabled-by-default cooldown configuration, individual durations in seconds and a default-off creative cooldown option; creative bypasses both checks and writes.
+- Require Ars Conflux 0.1.11. Six focused server GameTests pass with Iron / Goety coexistence, including actual Ars dispatch, failed/successful Earthdive, duplicate callbacks, expiry and configuration behavior.
+
 ## 0.1.0-dev.5
 
 - Add Gauntlet Laser effect glyph and native Scribe recipe using Blazing Eye + Source Gem + 27 XP.

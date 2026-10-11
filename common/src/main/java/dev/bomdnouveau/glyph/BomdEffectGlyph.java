@@ -33,11 +33,12 @@ public final class BomdEffectGlyph extends AbstractEffect implements TriggerPaid
             dev.bomdnouveau.casting.GauntletLaser.start(world, frame, stats.getAmpMultiplier(), firstCharge(context, stats.getAugments()));
             return;
         }
-        firstCharge(context, stats.getAugments()).trigger(() -> {
+        boolean success = firstCharge(context, stats.getAugments()).trigger(() -> {
             if (ability.groundEffect()) return GroundEffects.trigger(ability, world, frame, stats.getAmpMultiplier());
             NativePayloads.impact(ability.payload(), world, frame, hit, NativePayloads.damage(ability.payload(), stats.getAmpMultiplier()), stats.getAmpMultiplier());
             return true;
         });
+        if (success && ability == Ability.EARTHDIVE) dev.bomdnouveau.casting.BomdCooldowns.succeeded(frame.caster(), ability);
     }
     @Override public ResourceCharge firstCharge(SpellContext context, List<AbstractAugment> augments) { return BomdResources.quote(context, ability, augments); }
     @Override public int getDefaultManaCost() { return 0; }

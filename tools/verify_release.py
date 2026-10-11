@@ -51,5 +51,5 @@ if '--artifacts-only' in sys.argv:
     print(f'{version}: 11 glyph recipes, native icon references, localizations, licensing and source/binary isolation verified; runtime tests not rerun.')
     sys.exit(0)
 log = (root / 'build/payload-tests.log').read_text(encoding='utf-16')
-assert 'All 5 required tests passed' in log and 'BUILD SUCCESSFUL' in log
-print(f'{version}: 11 glyph recipes, native icon references, both localizations, LGPL/GPL notices, source/binary isolation and 5 focused GameTests verified.')
+assert 'All 6 required tests passed' in log and 'BUILD SUCCESSFUL' in log
+print(f'{version}: 11 glyph recipes, native icon references, both localizations, LGPL/GPL notices, source/binary isolation and 6 focused GameTests verified.')

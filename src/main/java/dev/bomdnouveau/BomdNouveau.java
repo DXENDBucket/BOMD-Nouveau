@@ -17,6 +17,7 @@ public final class BomdNouveau {
     public BomdNouveau(IEventBus bus, ModContainer container) {
         container.registerConfig(ModConfig.Type.SERVER, BomdConfig.SPEC);
         GlyphCatalog.register();
+        dev.bomdnouveau.casting.BomdActiveCastProvider.register();
         bus.addListener(dev.bomdnouveau.network.LaserVisualPayload::register);
         bus.addListener((FMLCommonSetupEvent event) -> event.enqueueWork(GlyphCatalog::configureCarriers));
         var tabs = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MOD_ID);

@@ -1,4 +1,4 @@
-# Native payload audit — 0.1.0-dev.5
+# Native payload audit — 0.1.0-dev.6
 
 Target: installed BOMD NeoForge 1.3.3, source snapshot
 `1a7bd955d201d1b4d066157b8335cd967677e209`.
@@ -160,8 +160,8 @@ inspection. No Void Blossom spike renderer or Boss-only client actor is used her
   helper/texture with both its origin translation and endpoint coordinate adjusted
   together. The native helper's `eyeHeight - 1.7` offset is compensated explicitly.
 - Native block destruction is omitted deliberately, not approximated. Boss body
-  animations cannot appear on arbitrary recipients. No added channel lock or
-  cooldown is applied. Later Ars effects retain their ordinary trigger semantics;
+  animations cannot appear on arbitrary recipients. No added channel lock is
+  applied; dev.6 adds a cooldown at the active-release boundary. Later Ars effects retain their ordinary trigger semantics;
   individual laser damage ticks do not execute the remaining recipe again.
 
 The fifth focused test exercises no warm-up damage/cost, opaque clipping, actual
@@ -169,3 +169,28 @@ turn lag and hard-mode damage, upkeep depletion, allied eyes/facing precedence,
 damage ownership, host loss, fixed-point incoming geometry, creative exemption
 and natural expiry. Dedicated-server startup with all three addons also verifies
 client class separation. Visual inspection is still needed for first/third person.
+
+## Active cooldowns — dev.6
+
+`BomdActiveCastProvider` registers only BOMD recipes with Conflux's public
+`ActiveCastProvider` API. It never performs per-hit cooldown checks. Provider
+queries read deadlines; an acknowledged release commits each distinct glyph once.
+Other providers retain their own policies and storage; pure Ars recipes are unchanged.
+
+Deadlines belong to the living caster's persistent compound, keyed by glyph ID,
+using the server Overworld game clock across dimensions. Configuration disables
+checks/writes globally or for individual zero-duration glyphs; creative bypasses
+both by default. Normal cooldowns start at release, including the laser's warm-up.
+
+Earthdive is the result-dependent exception. A successful paid teleport calls
+`BomdCooldowns.succeeded`, which queues one keyed `ActiveCasts.afterRelease` action
+if an enclosing active use exists. This leaves all synchronous branches eligible
+until release; failures queue nothing. Passive/late successes commit immediately
+without denying their ongoing execution. There is no early cooldown for failed
+teleportation and no cooldown refund on ordinary missed projectiles.
+
+The sixth focused case verifies real Ars launch through Conflux, recipe/weapon
+sharing, complete denial with no action/payment, passive repeated conversion,
+pure Ars isolation, keyed callback deduplication/drop on unacknowledged uses,
+failed Earthdive, two successful same-use branches, creative and global switches,
+and clock expiry. The shared Core callback API also compiles for Forge 1.20.1.

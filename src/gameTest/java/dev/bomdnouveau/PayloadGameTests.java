@@ -273,6 +273,76 @@ public final class PayloadGameTests {
             });
         });
     }
+    @GameTest(template="empty",batch="bmd_cooldowns",timeoutTicks=140)
+    public static void confluxCooldownReleaseBoundariesAndEarthdiveResults(GameTestHelper h) {
+        var p=player(h);var mana=CapabilityRegistry.getMana(p);
+        var missile=GlyphCatalog.PROJECTILES.getFirst();var spell=new Spell(MethodProjectile.INSTANCE,missile);
+        var source=dev.arsconflux.api.casting.ActiveCastSource.CASTER_TOOL;
+        h.assertTrue(dev.arsconflux.api.casting.ActiveCasts.perform(spell,p,net.minecraft.world.InteractionHand.MAIN_HAND,source,
+                ()->resolver(h,p,spell).onCast(ItemStack.EMPTY,h.getLevel()),false,false),"Real Ars dispatch is accepted through Conflux");
+        close(h,BomdCooldowns.remaining(p,Ability.MISSILE),dev.bomdnouveau.platform.BomdConfig.cooldownTicks(Ability.MISSILE),"Accepted release starts the configured cooldown");
+        double after=mana.getCurrentMana();var blockedCalls=new java.util.concurrent.atomic.AtomicInteger();
+        h.assertTrue(!dev.arsconflux.api.casting.ActiveCasts.execute(new Spell(MethodProjectile.INSTANCE,missile),p,
+                dev.arsconflux.api.casting.ActiveCastSource.WEAPON,()->{blockedCalls.incrementAndGet();return true;},false),"Switching recipe/weapon cannot bypass a glyph cooldown");
+        close(h,blockedCalls.get(),0,"Cooldown denial happens before the action");close(h,mana.getCurrentMana(),after,"Denied active use spends no Mana");
+        var pure=new Spell(MethodSelf.INSTANCE,new Marker());
+        h.assertTrue(dev.arsconflux.api.casting.ActiveCasts.allowed(pure,p,source),"Pure Ars recipes are unaffected");
+        var passive=resolver(h,p,spell);passive.spellContext.nextPart();
+        var orbit=new EntityOrbitProjectile(h.getLevel(),passive,p);orbit.setPos(scene(h).add(0,3,0));
+        h.assertTrue(ProjectileDispatch.convert(orbit),"A passive/repeated carrier still converts while its glyph cools down");
+        h.assertTrue(!h.getLevel().getEntitiesOfClass(BaseThrownItemProjectile.class,new AABB(scene(h),scene(h)).inflate(24)).isEmpty(),"Payload execution remains available outside a new active use");
+        clean(h,p);
+
+        var commits=new java.util.concurrent.atomic.AtomicInteger();var commitKey=CarrierRegistry.id("bomd_nouveau:test_commit");
+        dev.arsconflux.api.casting.ActiveCasts.execute(pure,p,source,()->{
+            h.assertTrue(dev.arsconflux.api.casting.ActiveCasts.afterRelease(p,commitKey,commits::incrementAndGet),"Core captures active release callback");return false;
+        },false);
+        close(h,commits.get(),0,"Unacknowledged uses drop deferred commits");
+        dev.arsconflux.api.casting.ActiveCasts.execute(pure,p,source,()->{
+            dev.arsconflux.api.casting.ActiveCasts.afterRelease(p,commitKey,commits::incrementAndGet);
+            dev.arsconflux.api.casting.ActiveCasts.afterRelease(p,commitKey,commits::incrementAndGet);
+            close(h,commits.get(),0,"Deferred commits do not gate sibling dispatches");
+            dev.arsconflux.api.casting.ActiveCasts.dispatched(resolver(h,p,pure),true);return true;
+        },false);
+        close(h,commits.get(),1,"Repeated success callbacks commit once per acknowledged use");
+        h.assertTrue(!dev.arsconflux.api.casting.ActiveCasts.afterRelease(p,commitKey,commits::incrementAndGet),"Passive use reports no active release rather than leaking a callback");
+
+        var origin=scene(h).add(.5,0,.5);var base=BlockPos.containing(origin);p.setPos(origin);p.setYRot(-90);p.setXRot(0);
+        var earth=GlyphCatalog.EFFECTS.stream().filter(g->g.ability==Ability.EARTHDIVE).findFirst().orElseThrow();var dive=new Spell(MethodSelf.INSTANCE,earth);
+        for(int x=1;x<=2;x++)for(int y=0;y<4;y++)for(int z=-2;z<=2;z++)h.getLevel().setBlock(base.offset(x,y,z),Blocks.BEDROCK.defaultBlockState(),2);
+        dev.arsconflux.api.casting.ActiveCasts.execute(dive,p,source,()->resolver(h,p,dive).onCast(ItemStack.EMPTY,h.getLevel()),false);
+        close(h,p.getX(),origin.x,"Failed native wall search leaves the caster in place");close(h,BomdCooldowns.remaining(p,Ability.EARTHDIVE),0,"Failed Earthdive adds no cooldown even after an acknowledged Ars dispatch");
+        for(int x=1;x<=2;x++)for(int y=0;y<4;y++)for(int z=-2;z<=2;z++)h.getLevel().setBlock(base.offset(x,y,z),Blocks.STONE.defaultBlockState(),2);
+        h.assertTrue(dev.arsconflux.api.casting.ActiveCasts.execute(dive,p,source,()->{
+            boolean first=resolver(h,p,dive).onCast(ItemStack.EMPTY,h.getLevel());
+            h.assertTrue(p.getX()>base.getX()+3,"First synchronous Earthdive succeeds");
+            close(h,BomdCooldowns.remaining(p,Ability.EARTHDIVE),0,"Successful result waits until the enclosing use releases");
+            p.setPos(origin);
+            boolean second=resolver(h,p,dive).onCast(ItemStack.EMPTY,h.getLevel());
+            return first && second && p.getX()>base.getX()+3;
+        },false),"Multiple synchronous branches complete before cooldown commitment");
+        close(h,BomdCooldowns.remaining(p,Ability.EARTHDIVE),dev.bomdnouveau.platform.BomdConfig.cooldownTicks(Ability.EARTHDIVE),"Successful Earthdive commits exactly at release");
+        h.assertTrue(!dev.arsconflux.api.casting.ActiveCasts.allowed(dive,p,source),"New Earthdive is blocked after successful teleport");
+        p.setGameMode(GameType.CREATIVE);
+        h.assertTrue(dev.arsconflux.api.casting.ActiveCasts.allowed(dive,p,source),"Creative bypasses an existing cooldown");
+        long deadline=p.getPersistentData().getCompound("bomd_nouveau_cooldowns").getLong(Ability.EARTHDIVE.id);
+        BomdCooldowns.released(p,Ability.EARTHDIVE);
+        close(h,p.getPersistentData().getCompound("bomd_nouveau_cooldowns").getLong(Ability.EARTHDIVE.id),deadline,"Creative does not extend cooldowns");
+        try {
+            dev.bomdnouveau.platform.BomdConfig.CREATIVE_COOLDOWN.set(true);
+            h.assertTrue(!dev.arsconflux.api.casting.ActiveCasts.allowed(dive,p,source),"Creative cooldown configuration restores checks");
+            dev.bomdnouveau.platform.BomdConfig.COOLDOWNS_ENABLED.set(false);
+            h.assertTrue(dev.arsconflux.api.casting.ActiveCasts.allowed(dive,p,source),"Global disable bypasses cooldown checks");
+        } finally {
+            dev.bomdnouveau.platform.BomdConfig.CREATIVE_COOLDOWN.set(false);
+            dev.bomdnouveau.platform.BomdConfig.COOLDOWNS_ENABLED.set(true);
+        }
+        p.setGameMode(GameType.SURVIVAL);
+        h.runAfterDelay(dev.bomdnouveau.platform.BomdConfig.cooldownTicks(Ability.MISSILE)+1,()->{
+            h.assertTrue(dev.arsconflux.api.casting.ActiveCasts.allowed(spell,p,source),"Server clock expires the projectile cooldown");
+            clean(h,p);p.discard();ExecutionSessions.tick();h.succeed();
+        });
+    }
     private static void laser(GameTestHelper h,ServerPlayer p,HitResult hit,Vec3 direction,java.util.concurrent.atomic.AtomicInteger budget) {
         var glyph=GlyphCatalog.EFFECTS.stream().filter(g->g.ability==Ability.GAUNTLET_LASER).findFirst().orElseThrow();
         var cast=new SpellResolver(new SpellContext(h.getLevel(),new Spell(MethodTouch.INSTANCE,glyph),p,new LivingCaster(p) {
