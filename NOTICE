@@ -1,0 +1,14 @@
+BOMD & Nouveau
+Copyright (c) 2026 EndXiom
+Licensed under GNU LGPL version 3. See LICENSE and licenses/GPL-3.0.txt.
+
+Uses Bosses of Mass Destruction, by barribob (miyo6032), and its Forge/NeoForge
+port by CerbonXD. Both projects publish GNU LGPL version 3 license texts.
+https://github.com/barribob/bosses-of-mass-destruction
+https://github.com/CERBON-MODS/Bosses-of-Mass-Destruction-FORGE
+
+Native projectile callbacks are adapted for Ars invocation in
+dev.bomdnouveau.casting.NativePayloads. Changes: caller/target geometry,
+fixed hard-mode damage, Ars amplification, payment and world lifecycle.
+The native mod is a separately installed dependency, not bundled here.
+Its textures/models/sounds are referenced at runtime, not redistributed.

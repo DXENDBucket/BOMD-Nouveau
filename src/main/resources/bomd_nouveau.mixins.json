@@ -1,0 +1,8 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "dev.bomdnouveau.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": ["NativeStateMixin", "ManagedMovementMixin", "ProjectileHitAccess", "NativeDamageMixin", "SporeDamageMixin", "ManagedCometHurtMixin"],
+  "injectors": {"defaultRequire": 1}
+}

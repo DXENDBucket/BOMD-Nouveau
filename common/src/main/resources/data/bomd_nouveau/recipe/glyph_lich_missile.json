@@ -1,0 +1,16 @@
+{
+  "type": "ars_nouveau:glyph",
+  "exp": 27,
+  "output": {
+    "id": "bomd_nouveau:glyph_lich_missile",
+    "count": 1
+  },
+  "inputs": [
+    {
+      "item": "bosses_of_mass_destruction:ancient_anima"
+    },
+    {
+      "item": "ars_nouveau:source_gem"
+    }
+  ]
+}

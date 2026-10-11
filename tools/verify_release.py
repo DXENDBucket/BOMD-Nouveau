@@ -1,0 +1,51 @@
+"""Verify the six-glyph release, native references, licensing and artifact isolation."""
+from pathlib import Path
+from zipfile import ZipFile
+import json
+import struct
+
+root = Path(__file__).resolve().parents[1]
+version = (root / 'VERSION').read_text(encoding='utf-8').strip()
+resources = root / 'common/src/main/resources'
+languages = {p.stem: json.loads(p.read_text(encoding='utf-8'))
+             for p in (resources / 'assets/bomd_nouveau/lang').glob('*.json')}
+assert set(languages) == {'en_us', 'zh_cn'}
+assert languages['en_us'].keys() == languages['zh_cn'].keys()
+with ZipFile(root / 'libs/bomd.jar') as native:
+    for model in (resources / 'assets/bomd_nouveau/models/item').glob('*.json'):
+        definition = json.loads(model.read_text(encoding='utf-8'))
+        namespace, path = definition['parent'].split(':')
+        assert f'assets/{namespace}/models/{path}.json' in native.namelist()
+        for language in languages.values():
+            assert language[f'bomd_nouveau.glyph_name.{model.stem}']
+            assert language[f'bomd_nouveau.glyph_desc.{model.stem}']
+recipes = list((resources / 'data/bomd_nouveau/recipe').glob('glyph_*.json'))
+assert len(recipes) == 6
+binary = root / f'build/libs/bomd-nouveau-{version}-mc1.21.1-neoforge.jar'
+source = root / f'build/libs/bomd-nouveau-{version}-sources.jar'
+for artifact in (binary, source):
+    with ZipFile(artifact) as jar:
+        names = jar.namelist()
+        for notice in ('LICENSE', 'licenses/GPL-3.0.txt', 'NOTICE', 'THIRD_PARTY_NOTICES.md'):
+            assert notice in names, (artifact, notice)
+        assert b'GNU LESSER GENERAL PUBLIC LICENSE' in jar.read('LICENSE')
+        assert not any(n.endswith('.jar') for n in names), 'Dependencies must remain separate'
+        assert not any('GameTests' in n or 'test_marker' in n for n in names)
+        for recipe in recipes:
+            path = recipe.relative_to(resources).as_posix()
+            assert json.loads(jar.read(path)) == json.loads(recipe.read_text(encoding='utf-8'))
+        if artifact == binary:
+            assert version in jar.read('META-INF/neoforge.mods.toml').decode()
+            assert 'LGPL-3.0-only' in jar.read('META-INF/neoforge.mods.toml').decode()
+            for name in names:
+                if name.endswith('.class'):
+                    assert name.startswith('dev/bomdnouveau/'), f'Unexpected bundled class: {name}'
+                    assert struct.unpack('>H', jar.read(name)[6:8])[0] == 65
+            mixins = json.loads(jar.read('bomd_nouveau.mixins.json'))
+            for mixin in mixins['mixins']:
+                assert f'dev/bomdnouveau/mixin/{mixin}.class' in names
+        else:
+            assert 'dev/bomdnouveau/casting/NativePayloads.java' in names
+log = (root / 'build/payload-tests.log').read_text(encoding='utf-16')
+assert 'All 3 required tests passed' in log and 'BUILD SUCCESSFUL' in log
+print(f'{version}: 6 glyph recipes, native icon references, both localizations, LGPL/GPL notices, source/binary isolation and 3 focused GameTests verified.')

@@ -1,0 +1,35 @@
+{
+  "minecraft": "1.21.1",
+  "neoforge": "21.1.250",
+  "ars_conflux": "0.1.10",
+  "jars": {
+    "ars.jar": {
+      "sha256": "45c1b6022d8e63464177c1f822bda22c3d6fb66970857fd7677e4e3ccffd259f",
+      "size": 19841105
+    },
+    "bomd.jar": {
+      "sha256": "93da8753a00229e41c5ed399e6cf849737e7bd9b4109d5d8e4ad3a20136deb82",
+      "size": 1952017
+    },
+    "cerbons-api.jar": {
+      "sha256": "5c750762b31ab79127df6f455351fe79793d8c2b41e1a0f94b335a5a1123534d",
+      "size": 250545
+    },
+    "cloth-config.jar": {
+      "sha256": "65e722e0d98431a07c45f8bdd8d529a217cc8c175fde1740248bd5c1b4f3c0d4",
+      "size": 1163890
+    },
+    "curios.jar": {
+      "sha256": "a45df2125c26219974aba7507ffc9afe7b83acc941a386af3faacb1cc0056fde",
+      "size": 410690
+    },
+    "geckolib.jar": {
+      "sha256": "20a1995e4074f387ff549e2c57ea79dd7d41ee83c6afb9dd6a6e840e592d1c47",
+      "size": 634531
+    },
+    "patchouli.jar": {
+      "sha256": "959af52ed6640c316c3a8469203420be4aeea11ad6603890ba83bf48f5d9f993",
+      "size": 646777
+    }
+  }
+}
