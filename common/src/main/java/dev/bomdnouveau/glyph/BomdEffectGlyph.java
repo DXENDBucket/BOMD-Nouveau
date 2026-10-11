@@ -29,6 +29,10 @@ public final class BomdEffectGlyph extends AbstractEffect implements TriggerPaid
         if (!(level instanceof ServerLevel world) || !isEnabled()) return;
         var frame = CastContext.of(context, hit, null);
         if (frame.caster() == null || !frame.caster().isAlive()) return;
+        if (ability == Ability.GAUNTLET_LASER) {
+            dev.bomdnouveau.casting.GauntletLaser.start(world, frame, stats.getAmpMultiplier(), firstCharge(context, stats.getAugments()));
+            return;
+        }
         firstCharge(context, stats.getAugments()).trigger(() -> {
             if (ability.groundEffect()) return GroundEffects.trigger(ability, world, frame, stats.getAmpMultiplier());
             NativePayloads.impact(ability.payload(), world, frame, hit, NativePayloads.damage(ability.payload(), stats.getAmpMultiplier()), stats.getAmpMultiplier());

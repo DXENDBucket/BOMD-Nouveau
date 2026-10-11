@@ -17,7 +17,8 @@ public final class GlyphCatalog {
     public static final List<BomdEffectGlyph> EFFECTS = List.of(
             new BomdEffectGlyph(Ability.COMET_BURST), new BomdEffectGlyph(Ability.SPORE_BURST),
             new BomdEffectGlyph(Ability.OBSIDIAN_BURST), new BomdEffectGlyph(Ability.FIRE_WAVE),
-            new BomdEffectGlyph(Ability.OBSIDIAN_SPIKES), new BomdEffectGlyph(Ability.EARTHDIVE));
+            new BomdEffectGlyph(Ability.OBSIDIAN_SPIKES), new BomdEffectGlyph(Ability.EARTHDIVE),
+            new BomdEffectGlyph(Ability.GAUNTLET_LASER));
     public static final List<AbstractSpellPart> ALL = Stream.concat(EFFECTS.stream(), PROJECTILES.stream())
             .map(g -> (AbstractSpellPart)g).toList();
     public static void register() {

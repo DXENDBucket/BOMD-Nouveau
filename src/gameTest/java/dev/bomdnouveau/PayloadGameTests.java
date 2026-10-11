@@ -214,6 +214,74 @@ public final class PayloadGameTests {
             });
         });
     }
+    @GameTest(template="empty",batch="bmd_laser",timeoutTicks=360)
+    public static void laserChargeWallLagUpkeepAlliedHostAndCreative(GameTestHelper h) {
+        var p=player(h);var origin=scene(h).add(.5,0,.5);p.setPos(origin);p.setYRot(-90);p.setXRot(0);
+        int price=dev.bomdnouveau.platform.BomdConfig.cost(Ability.GAUNTLET_LASER);
+        var budget=new java.util.concurrent.atomic.AtomicInteger(price);
+        var victim=cow(h,origin.add(5,.7,0));var base=BlockPos.containing(origin);
+        for(int y=0;y<4;y++)for(int z=-1;z<=1;z++)h.getLevel().setBlock(base.offset(3,y,z),Blocks.STONE.defaultBlockState(),2);
+        laser(h,p,new EntityHitResult(p),Vec3.ZERO,budget);
+        h.runAfterDelay(20,()->{
+            close(h,victim.getHealth(),500,"Laser charge-up cannot hurt targets");
+            close(h,budget.get(),price,"No upkeep is charged during warm-up");
+        });
+        h.runAfterDelay(35,()->{
+            close(h,victim.getHealth(),500,"Opaque wall stops the active laser");
+            close(h,budget.get(),0,"Active laser prepays one second even when blocked");
+            for(int y=0;y<4;y++)for(int z=-1;z<=1;z++)h.getLevel().setBlock(base.offset(3,y,z),Blocks.AIR.defaultBlockState(),2);
+            p.setYRot(0);
+        });
+        h.runAfterDelay(40,()->{
+            close(h,500-victim.getHealth(),com.cerbon.bosses_of_mass_destruction.entity.BMDEntities.mobConfig.gauntletConfig.attack*.75*1.5,
+                    "Turn lag keeps the former aim briefly; damage is native hard-mode laser baseline");
+            h.assertTrue(victim.getLastDamageSource().getEntity()==p,"Actual caster owns beam damage");
+        });
+        h.runAfterDelay(65,()->{
+            var stoppedHealth=victim.getHealth();p.setYRot(-90);
+            h.runAfterDelay(30,()->{
+                close(h,victim.getHealth(),stoppedHealth,"Depleted upkeep ends damage rather than continuing a free beam");
+                victim.discard();
+                var host=cow(h,origin);host.setYRot(-90);var target=cow(h,origin.add(5,.3,0));
+                p.setPos(origin.add(-8,0,8));budget.set(price*3);
+                laser(h,p,new EntityHitResult(host),new Vec3(0,0,-1),budget);
+                close(h,budget.get(),price*3,"Non-allied hosts are rejected for free");
+                var scoreboard=h.getLevel().getScoreboard();var team=scoreboard.addPlayerTeam("laser_"+p.getId());
+                scoreboard.addPlayerToTeam(p.getScoreboardName(),team);scoreboard.addPlayerToTeam(host.getScoreboardName(),team);
+                laser(h,p,new EntityHitResult(host),new Vec3(0,0,-1),budget);
+                h.runAfterDelay(40,()->{
+                    h.assertTrue(target.getHealth()<500 && target.getLastDamageSource().getEntity()==p,"Allied host eyes/facing override incoming direction; damage remains owned by caster");
+                    close(h,host.getHealth(),500,"Beam never damages its emitting host");
+                    host.discard();var after=target.getHealth();
+                    h.runAfterDelay(10,()->{
+                        close(h,target.getHealth(),after,"Host removal cancels beam");
+                        scoreboard.removePlayerTeam(team);target.discard();p.setPos(origin);p.setYRot(180);p.setGameMode(GameType.CREATIVE);
+                        budget.set(0);var creativeVictim=cow(h,origin.add(5,.7,0));
+                        laser(h,p,block(p.getEyePosition()),new Vec3(1,0,0),budget);
+                        h.runAfterDelay(40,()->h.assertTrue(creativeVictim.getHealth()<500,"Point trigger uses incoming trajectory even when caster faces elsewhere; creative starts at zero Mana"));
+                        h.runAfterDelay(95,()->{
+                            float finished=creativeVictim.getHealth();
+                            close(h,budget.get(),0,"Creative upkeep remains free");
+                            h.assertTrue(finished<450,"Beam repeatedly damages across its native lifetime");
+                            h.runAfterDelay(20,()->{
+                                close(h,creativeVictim.getHealth(),finished,"Natural end stops beam damage");
+                                clean(h,p);p.discard();ExecutionSessions.tick();h.succeed();
+                            });
+                        });
+                    });
+                });
+            });
+        });
+    }
+    private static void laser(GameTestHelper h,ServerPlayer p,HitResult hit,Vec3 direction,java.util.concurrent.atomic.AtomicInteger budget) {
+        var glyph=GlyphCatalog.EFFECTS.stream().filter(g->g.ability==Ability.GAUNTLET_LASER).findFirst().orElseThrow();
+        var cast=new SpellResolver(new SpellContext(h.getLevel(),new Spell(MethodTouch.INSTANCE,glyph),p,new LivingCaster(p) {
+            @Override public boolean enoughMana(int amount) {return budget.get()>=amount;}
+            @Override public void expendMana(int amount) {budget.addAndGet(-amount);}
+        },ItemStack.EMPTY));
+        cast.spellContext.nextPart();dev.arsconflux.api.context.TriggerGeometry.write(cast.spellContext,direction);
+        cast.onResolveEffect(h.getLevel(),hit);
+    }
     private static void effect(GameTestHelper h,ServerPlayer p,Ability ability,HitResult hit,Vec3 direction) {
         var glyph=GlyphCatalog.EFFECTS.stream().filter(g->g.ability==ability).findFirst().orElseThrow();
         var cast=resolver(h,p,new Spell(MethodTouch.INSTANCE,glyph));cast.spellContext.nextPart();

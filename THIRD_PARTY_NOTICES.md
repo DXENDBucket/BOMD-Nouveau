@@ -9,6 +9,9 @@ text and the GPL v3 text it incorporates accompany binary and source JARs.
   Native callbacks in `NativePayloads` adapt `VolleyAction` / `CometAction`.
   `GroundEffects` adapts Obsidilith `BurstAction` / `WaveAction` / `SpikeAction`
   orchestration and invokes native `RiftBurst` / `WallTeleport` helpers.
+  `GauntletLaser` adapts `LaserAction` timing and line-hit orchestration. Client
+  visuals adapt `GauntletClientLaserHandler` / `LaserParticleRenderer` particle
+  placement and invoke native `VanillaCopies.renderBeam` using the original material.
   Modifying interfaces and native impact hooks does not alter ordinary Boss projectiles.
 - **Ars Conflux**: EndXiom, MIT. Separately installed dependency. This addon
   uses its public carrier, execution, context, resource and presentation APIs.

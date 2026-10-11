@@ -39,5 +39,10 @@
   "ars_nouveau.augment_desc.glyph_obsidian_spikes_glyph_dampen": "Decrease damage per hit using the Harm glyph amplification value.",
   "item.bomd_nouveau.glyph_earthdive": "Earthdive",
   "bomd_nouveau.glyph_name.glyph_earthdive": "Earthdive",
-  "bomd_nouveau.glyph_desc.glyph_earthdive": "Move yourself or the selected ally through a nearby wall along the trigger direction. Self-casts use its facing. Unbreakable blocks stop passage."
+  "bomd_nouveau.glyph_desc.glyph_earthdive": "Move yourself or the selected ally through a nearby wall along the trigger direction. Self-casts use its facing. Unbreakable blocks stop passage.",
+  "item.bomd_nouveau.glyph_gauntlet_laser": "Gauntlet Laser",
+  "bomd_nouveau.glyph_name.glyph_gauntlet_laser": "Gauntlet Laser",
+  "bomd_nouveau.glyph_desc.glyph_gauntlet_laser": "Charge a red beam, then sweep for three seconds with a slight aiming delay. Self or allied recipients emit from their eyes; point triggers use the incoming direction. Active seconds consume Mana; depletion stops the beam. Blocks stop it without being destroyed.",
+  "ars_nouveau.augment_desc.glyph_gauntlet_laser_glyph_amplify": "Increase damage per hit using the Harm glyph amplification value.",
+  "ars_nouveau.augment_desc.glyph_gauntlet_laser_glyph_dampen": "Decrease damage per hit using the Harm glyph amplification value."
 }

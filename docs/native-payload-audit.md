@@ -1,4 +1,4 @@
-# Native payload audit — 0.1.0-dev.3
+# Native payload audit — 0.1.0-dev.5
 
 Target: installed BOMD NeoForge 1.3.3, source snapshot
 `1a7bd955d201d1b4d066157b8335cd967677e209`.
@@ -43,7 +43,7 @@ their 30-tick result and a 100-tick safety cleanup; native rifts cancel if the o
 ## Version and verification scope
 
 Only 1.21.1 NeoForge is implemented. Four projectile replacements
-and six effects have native Scribe recipes and English/Chinese localization. Glyphs
+and seven effects have native Scribe recipes and English/Chinese localization. Glyphs
 are grouped through Core after normal Ars glyphs; projectile modifiers remain at the
 end of this provider's augments. Native icons are referenced, not copied.
 
@@ -54,8 +54,8 @@ spore removal, independent explosion damage/terrain preservation and recipe pres
 Development coexistence includes Iron & Nouveau and Goety & Nouveau with one Core.
 Client visuals still require in-game inspection; a server test cannot prove rendering.
 
-Remaining Boss attacks (gauntlet laser/shield, specialized spike animations, summoning,
-walls, and item teleport abilities) are not represented by these six glyphs.
+Remaining Boss attacks (gauntlet shielding/body actions, Void Blossom spike animations,
+minion summoning and arena pillars) are not represented by the current glyphs.
 
 ## Damage and cost review — dev.2
 
@@ -135,3 +135,37 @@ spike hits and slow, captured wave direction, full-sequence payment, player/crea
 wall teleportation, bedrock rejection, failed-cast nonpayment and creative exemption.
 Native client particles/sounds are dispatched; client appearance still needs manual
 inspection. No Void Blossom spike renderer or Boss-only client actor is used here.
+
+## Gauntlet Laser — dev.5
+
+- `LaserAction` starts after 25 ticks, collects an 8-sample aim history and runs a
+  60-tick phase at 30-block range. The adapter retains that warm-up, phase and lag,
+  using past facing rather than the Boss target's past position. The beam appears
+  after two history samples; damage waits for all eight, retaining the native
+  separation of visual appearance and first damage. A self/allied host follows
+  its eye position and look; a point trigger holds its origin and incoming
+  direction. Host/caster loss and loaded-path checks guard every tick.
+- Use native `BMDUtils.findEntitiesInLine` after server block clipping. Native laser
+  damage is attack × .75; fixed hard baseline is × 1.5 again, default 18. Harm
+  amplification is added once. A normal, non-shield-piercing damage type with
+  scaling `never` preserves armor and hurt immunity without reapplying difficulty.
+  Damage owner remains the actual caster; host and native allies are excluded.
+- Conflux owns the transient session and cleanup. Upkeep is prepaid in 20-tick
+  blocks before active damage/visuals, default 150 per block, at most three blocks.
+  Amplify surcharge applies to each payment. First-second affordability is required
+  at start; charging costs nothing. Creative bypass comes from the resource account.
+- Client packets carry server-clipped geometry, phase and a six-tick visual lease,
+  refreshed every two ticks with explicit closure and world-switch cleanup. Client
+  particles use native red full-bright sparkles; beam drawing invokes the native
+  helper/texture with both its origin translation and endpoint coordinate adjusted
+  together. The native helper's `eyeHeight - 1.7` offset is compensated explicitly.
+- Native block destruction is omitted deliberately, not approximated. Boss body
+  animations cannot appear on arbitrary recipients. No added channel lock or
+  cooldown is applied. Later Ars effects retain their ordinary trigger semantics;
+  individual laser damage ticks do not execute the remaining recipe again.
+
+The fifth focused test exercises no warm-up damage/cost, opaque clipping, actual
+turn lag and hard-mode damage, upkeep depletion, allied eyes/facing precedence,
+damage ownership, host loss, fixed-point incoming geometry, creative exemption
+and natural expiry. Dedicated-server startup with all three addons also verifies
+client class separation. Visual inspection is still needed for first/third person.

@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.0-dev.5
+
+- Add Gauntlet Laser effect glyph and native Scribe recipe using Blazing Eye + Source Gem + 27 XP.
+- Retain native 25-tick charge, 60-tick active phase, 8-tick aim history, 30-block range and line intersections. Damage uses fixed hard-mode Gauntlet laser baseline (18 by default) plus Harm amplification, without modifying caster melee attributes or resetting hurt immunity.
+- Use Conflux execution lifetime and resource transactions: each active second prepays 150 Mana by default, with at most three payments. Depletion, missing host/caster, unloaded path, natural expiry and server/world shutdown end the beam. Creative is exempt.
+- Self/allied hosts emit from their eyes; point triggers use incoming geometry. Allies and host are excluded from damage, blocks clip the beam without being destroyed.
+- Reuse BOMD's beam texture/render helper, native red sparkles and charge sound through short-lived client visual packets; no surrogate Boss or native casting-state mutation.
+- Five focused server GameTests pass with Iron / Goety coexistence. Client appearance remains subject to manual in-game inspection.
+
 ## 0.1.0-dev.4
 
 - Treat Earthdive as a beneficial action: only move the caster or a living ally recognized by vanilla alliance checks, never a non-allied or non-living entity target. Rejected targets do not charge Mana.

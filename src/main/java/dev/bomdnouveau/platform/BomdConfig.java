@@ -13,7 +13,9 @@ public final class BomdConfig {
     static {
         var b = new ModConfigSpec.Builder();
         b.push("mana");
-        for (var ability : Ability.values()) COSTS.put(ability, b.comment("Ars mana per actual projectile / effect activation.")
+        for (var ability : Ability.values()) COSTS.put(ability, b.comment(ability == Ability.GAUNTLET_LASER
+                ? "Ars mana per prepaid second of active laser; charge-up is free. At most three payments per beam."
+                : "Ars mana per actual projectile / effect activation.")
                 .defineInRange(ability.id, ability.cost, 0, 100000));
         AMPLIFY_COST = b.comment("Additional payload mana per Amplify. Ordinary Ars method/augment costs remain separate.")
                 .defineInRange("per_amplify", 10, 0, 100000);

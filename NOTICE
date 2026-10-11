@@ -12,5 +12,8 @@ dev.bomdnouveau.casting.NativePayloads. GroundEffects additionally adapts
 Obsidilith BurstAction, WaveAction and SpikeAction timing and placement,
 and invokes native RiftBurst / WallTeleport. Changes: caller/target geometry,
 fixed hard-mode damage, Ars amplification, payment and world lifecycle.
+GauntletLaser additionally adapts LaserAction timing and line intersections.
+LaserVisuals adapts GauntletClientLaserHandler / LaserParticleRenderer geometry
+and invokes native VanillaCopies.renderBeam with the original beam texture.
 The native mod is a separately installed dependency, not bundled here.
 Its textures/models/sounds are referenced at runtime, not redistributed.

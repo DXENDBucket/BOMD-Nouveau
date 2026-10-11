@@ -1,0 +1,9 @@
+{
+  "type": "ars_nouveau:glyph",
+  "exp": 27,
+  "output": { "id": "bomd_nouveau:glyph_gauntlet_laser", "count": 1 },
+  "inputs": [
+    { "item": "bosses_of_mass_destruction:blazing_eye" },
+    { "item": "ars_nouveau:source_gem" }
+  ]
+}

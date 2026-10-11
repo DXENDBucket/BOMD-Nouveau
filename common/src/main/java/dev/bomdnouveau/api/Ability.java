@@ -10,7 +10,8 @@ public enum Ability {
     OBSIDIAN_BURST("obsidian_burst", "Obsidian Burst", 200),
     FIRE_WAVE("fire_wave", "Fire Wave", 300),
     OBSIDIAN_SPIKES("obsidian_spikes", "Obsidian Spikes", 240),
-    EARTHDIVE("earthdive", "Earthdive", 100);
+    EARTHDIVE("earthdive", "Earthdive", 100),
+    GAUNTLET_LASER("gauntlet_laser", "Gauntlet Laser", 150);
     public final String id, name;
     public final int cost;
     Ability(String id, String name, int cost) { this.id = id; this.name = name; this.cost = cost; }
