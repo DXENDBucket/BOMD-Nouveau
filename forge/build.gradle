@@ -58,14 +58,15 @@ def generateBridges = tasks.register('generateBridges') {
     inputs.dir templates
     outputs.dir bridges
     doLast {
+        // Removed templates must not remain in incremental generated source output.
+        delete bridges.get().asFile
         def changes = [
             'platform/BomdConfig.java': ['net.neoforged.neoforge.common.ModConfigSpec':'net.minecraftforge.common.ForgeConfigSpec', 'ModConfigSpec':'ForgeConfigSpec'],
             'client/LaserVisuals.java': ['net.neoforged.api.distmarker':'net.minecraftforge.api.distmarker', 'net.neoforged.bus.api':'net.minecraftforge.eventbus.api', 'net.neoforged.fml.common.EventBusSubscriber':'net.minecraftforge.fml.common.Mod.EventBusSubscriber', 'net.neoforged.neoforge.client.event.ClientTickEvent':'net.minecraftforge.event.TickEvent', 'net.neoforged.neoforge.client.event.RenderLevelStageEvent':'net.minecraftforge.client.event.RenderLevelStageEvent', 'ResourceLocation.fromNamespaceAndPath(':'new ResourceLocation(', 'ClientTickEvent.Post event':'TickEvent.ClientTickEvent event', 'var level = level();\n        if (level == null) return;':'if (event.phase != TickEvent.Phase.END) return;\n        var level = level();\n        if (level == null) return;', 'event.getPartialTick().getGameTimeDeltaPartialTick(false)':'event.getPartialTick()'],
             'mixin/NativeStateMixin.java': ['protected void defineSynchedData(SynchedEntityData.Builder builder) { super.defineSynchedData(builder); builder.define(bomdNouveau$MODE, 0); }':'protected void defineSynchedData() { super.defineSynchedData(); getEntityData().define(bomdNouveau$MODE, 0); }'],
             'mixin/NativeDamageMixin.java': ['getAttributeValue(Lnet/minecraft/core/Holder;)D':'getAttributeValue(Lnet/minecraft/world/entity/ai/attributes/Attribute;)D'],
             'mixin/SporeDamageMixin.java': ['getAttributeValue(Lnet/minecraft/core/Holder;)D':'getAttributeValue(Lnet/minecraft/world/entity/ai/attributes/Attribute;)D'],
-            'platform/ArsDamage.java': ['net.neoforged.neoforge.common.NeoForge':'net.minecraftforge.common.MinecraftForge', 'NeoForge.EVENT_BUS':'MinecraftForge.EVENT_BUS', 'PerkAttributes.SPELL_DAMAGE_BONUS':'PerkAttributes.SPELL_DAMAGE_BONUS.get()'],
-            'mixin/NativeArsDamageMixin.java': [:], 'mixin/ArsExplosionDamageMixin.java': [:],
+            'mixin/NativeArsDamageMixin.java': [:],
             'mixin/ManagedMovementMixin.java': [:], 'mixin/ManagedCometHurtMixin.java': [:], 'mixin/ProjectileHitAccess.java': [:]
         ]
         changes.each { path, replacements ->
@@ -91,6 +92,7 @@ def generateTestBridges = tasks.register('generateTestBridges') {
     doLast {
         def text = file('../src/gameTest/java/dev/bomdnouveau/PayloadGameTests.java').getText('UTF-8').replace('\r\n','\n')
         text = text.replace('net.neoforged.neoforge.gametest','net.minecraftforge.gametest')
+                .replace('net.neoforged.fml.ModList','net.minecraftforge.fml.ModList')
                 .replace('net.neoforged.neoforge.common.NeoForge','net.minecraftforge.common.MinecraftForge')
                 .replace('PerkAttributes.SPELL_DAMAGE_BONUS','PerkAttributes.SPELL_DAMAGE_BONUS.get()')
                 .replace('CapabilityRegistry.getMana(p)', 'CapabilityRegistry.getMana(p).orElseThrow(IllegalStateException::new)')

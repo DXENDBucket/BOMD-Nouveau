@@ -40,6 +40,8 @@ dependencies {
     runtimeOnly fileTree(dir: 'libs', include: '*.jar')
     if (providers.gradleProperty('withArsSpells').getOrElse('false').toBoolean())
         runtimeOnly fileTree(dir: 'libs/ars-growth', include: '*.jar')
+    if (providers.gradleProperty('withCataclysm').getOrElse('false').toBoolean())
+        gameTestRuntimeOnly fileTree(dir: 'libs/cataclysm', include: '*.jar')
     if (providers.gradleProperty('coexistence').getOrElse('false').toBoolean())
         runtimeOnly fileTree(dir: 'libs/coexistence', include: '*.jar')
 }

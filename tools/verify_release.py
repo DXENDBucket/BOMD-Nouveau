@@ -29,6 +29,7 @@ source = build_root / f'build/libs/bomd-nouveau-{version}-sources.jar'
 for artifact in (binary, source):
     with ZipFile(artifact) as jar:
         names = jar.namelist()
+        assert not any('ArsExplosionDamageMixin' in n or n.endswith('/ArsDamage.class') or n.endswith('/ArsDamage.java') for n in names), 'Removed damage implementation must not remain in either distribution'
         for notice in ('LICENSE', 'licenses/GPL-3.0.txt', 'NOTICE', 'THIRD_PARTY_NOTICES.md'):
             assert notice in names, (artifact, notice)
         assert b'GNU LESSER GENERAL PUBLIC LICENSE' in jar.read('LICENSE')
@@ -47,6 +48,7 @@ for artifact in (binary, source):
         if artifact == binary:
             metadata = 'META-INF/mods.toml' if forge else 'META-INF/neoforge.mods.toml'
             assert version in jar.read(metadata).decode()
+            assert '[0.1.18,0.2)' in jar.read(metadata).decode(), 'Shared damage API requires Core 0.1.18'
             assert 'LGPL-3.0-only' in jar.read(metadata).decode()
             for name in names:
                 if name.endswith('.class'):
@@ -68,5 +70,5 @@ if '--artifacts-only' in sys.argv:
     sys.exit(0)
 log_bytes = (build_root / 'build/payload-tests.log').read_bytes()
 log = log_bytes.decode('utf-16' if log_bytes.startswith((b'\xff\xfe', b'\xfe\xff')) else 'utf-8', errors='replace')
-assert 'All 8 required tests passed' in log and 'BUILD SUCCESSFUL' in log
-print(f'{version}: 11 glyph recipes, native icon references, both localizations, LGPL/GPL notices, source/binary isolation and 8 focused GameTests verified.')
+assert 'All 9 required tests passed' in log and 'BUILD SUCCESSFUL' in log
+print(f'{version}: 11 glyph recipes, native icon references, both localizations, LGPL/GPL notices, source/binary isolation and 9 focused GameTests verified.')

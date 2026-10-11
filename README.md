@@ -1,10 +1,10 @@
 # BOMD & Nouveau
 
 把 Bosses of Mass Destruction 的攻击能力编排为 Ars Nouveau 魔符。
-当前是 **0.1.0-dev.9**，支持 **Minecraft 1.21.1 / NeoForge** 和 **Minecraft 1.20.1 / Forge**。
+当前是 **0.1.0-dev.10**，支持 **Minecraft 1.21.1 / NeoForge** 和 **Minecraft 1.20.1 / Forge**。
 Mod ID：`bomd_nouveau`。作者 EndXiom，许可 **LGPL v3**。
 
-需要 Ars Nouveau、Ars Conflux 0.1.11，以及对应版本的 BOMD 和它们自己的前置。
+需要 Ars Nouveau、Ars Conflux 0.1.18，以及对应版本的 BOMD 和它们自己的前置。
 NeoForge 使用 Ars 5.13.1 / BOMD 1.3.3；Forge 使用 Ars 4.12.7 / BOMD 1.1.2。
 Iron、Goety、Not Enough Glyphs、Hex Linker 均不是必需依赖。
 公共施法、资源和冷却源码保存在 `common/`；加载器入口、网络和效果注册差异放在各自平台层。
@@ -104,3 +104,7 @@ BOMD 作为单独依赖安装；本模组不打包其 JAR、贴图、模型或�
 无需 Iron 或 Ars ’n Spells；安装后者时按其原有 Ars 伤害事件桥接，不手动再叠一次 Iron 法强。NeoForge 的可选验证环境用 `-PwithArsSpells=true` 从忽略的 `libs/ars-growth` 读取本地依赖，不打包它们。该环境仅关闭魔力统一以维持测试池，伤害桥接启用；人工测试实例配置未改。
 
 NeoForge 和 Forge 的伤害规则共享设计。平台事件总线及属性 Holder 差异由既有 Forge 模板生成处理，新增代码不依赖 NeoForge 客户端类型。测试覆盖装备加成、一次事件修改／取消、延迟喷发、原生爆炸伤害源及作用域清理；孢子原生中毒可能继续扣血，因此测试核对 Post 的单次喷发伤害，不能把后续中毒算成重复加成。
+
+## Core 伤害 API 接入（dev.10）
+
+最低需要 Conflux 0.1.18。原生伤害的 Ars 装备加成、Pre/Post 和同步爆炸作用域交给 Core，删除本附属的重复伤害处理与 LivingEntity 爆炸钩子。原生钩子、伤害类型、基础数值、费用和冷却保持现有规则。

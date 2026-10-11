@@ -10,8 +10,7 @@
     "NativeDamageMixin",
     "SporeDamageMixin",
     "ManagedCometHurtMixin",
-    "NativeArsDamageMixin",
-    "ArsExplosionDamageMixin"
+    "NativeArsDamageMixin"
   ],
   "injectors": {
     "defaultRequire": 1

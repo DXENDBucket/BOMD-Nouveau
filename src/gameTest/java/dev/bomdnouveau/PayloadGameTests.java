@@ -402,7 +402,7 @@ public final class PayloadGameTests {
             NativePayloads.impact(Ability.COMET,h.getLevel(),frame,block(scene(h)),0,0);
             h.assertTrue(preCount[0]==1 && postCount[0]==1 && target.getHealth()<500,"Actual vanilla explosion passes through Ars once per target");
             target.invulnerableTime=0;target.setHealth(500);h.getLevel().explode(p,scene(h).x,scene(h).y,scene(h).z,4,Level.ExplosionInteraction.NONE);
-            h.assertTrue(preCount[0]==1 && dev.bomdnouveau.platform.ArsDamage.explosion()==null,"Scope cleans immediately; ordinary explosions stay unchanged");
+            h.assertTrue(preCount[0]==1 && dev.arsconflux.api.damage.NativeSpellDamage.currentScope()==null,"Scope cleans immediately; ordinary explosions stay unchanged");
             h.succeed();
         } finally {net.neoforged.neoforge.common.NeoForge.EVENT_BUS.unregister(pre);net.neoforged.neoforge.common.NeoForge.EVENT_BUS.unregister(post);clean(h,p);p.discard();}
     }
@@ -414,4 +414,29 @@ public final class PayloadGameTests {
         public boolean isEnabled(){return true;}public Set<AbstractAugment> getCompatibleAugments(){return Set.of();}
         public void onResolve(HitResult hit,Level world,LivingEntity caster,SpellStats stats,SpellContext context,SpellResolver resolver){hits++;}
     }
+    @GameTest(template="empty",batch="bomd_core_coexistence",timeoutTicks=40)
+    public static void sharedCoreScopeWithCataclysmNativeHit(GameTestHelper h) {
+        if (!net.neoforged.fml.ModList.get().isLoaded("cataclysm_nouveau")) {h.succeed();return;}
+        var p=player(h);var victim=cow(h,scene(h));
+        p.getAttribute(com.hollingsworth.arsnouveau.api.perk.PerkAttributes.SPELL_DAMAGE_BONUS).setBaseValue(6);
+        var context=CastContext.of(resolver(h,p,new Spell(MethodTouch.INSTANCE,GlyphCatalog.PROJECTILES.get(0))).spellContext,new EntityHitResult(victim),null);
+        int[] calls={0,0};
+        java.util.function.Consumer<com.hollingsworth.arsnouveau.api.event.SpellDamageEvent.Pre> pre=e->{if(e.caster==p && e.target==victim){calls[0]++;e.damage*=1.5F;}};
+        java.util.function.Consumer<com.hollingsworth.arsnouveau.api.event.SpellDamageEvent.Post> post=e->{if(e.caster==p && e.target==victim){calls[1]++;h.assertTrue(Math.abs(e.damage-22.5F)<.01,"Shared API applies 9+6 then event 1.5 exactly once");}};
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(pre);net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(post);
+        Entity wave=null;
+        try {
+            var type=Class.forName("com.github.L_Ender.cataclysm.entity.projectile.Wave_Entity");
+            wave=(Entity)type.getConstructor(Level.class,LivingEntity.class,int.class,float.class).newInstance(h.getLevel(),p,80,9F);
+            type.getMethod("setState",int.class).invoke(wave,1);
+            Class.forName("dev.cataclysmnouveau.casting.ManagedProjectile").getMethod("confluxCataclysm$mode",int.class).invoke(wave,2);
+            dev.arsconflux.api.damage.NativeSpellDamage.bind(wave,context);wave.setPos(victim.position());h.getLevel().addFreshEntity(wave);
+            var nativeWave=wave;
+            dev.arsconflux.api.damage.NativeSpellDamage.during(context,()->{nativeWave.tick();return null;});
+            h.assertTrue(calls[0]==1 && calls[1]==1 && victim.getHealth()<500,"Cataclysm hook and BOMD caller's scope share one dispatch guard");
+            h.assertTrue(dev.arsconflux.api.damage.NativeSpellDamage.currentScope()==null,"Cross-provider scope cleans");h.succeed();
+        } catch(ReflectiveOperationException e){throw new RuntimeException(e);}
+        finally {net.neoforged.neoforge.common.NeoForge.EVENT_BUS.unregister(pre);net.neoforged.neoforge.common.NeoForge.EVENT_BUS.unregister(post);if(wave!=null)wave.discard();p.discard();victim.discard();}
+    }
+
 }

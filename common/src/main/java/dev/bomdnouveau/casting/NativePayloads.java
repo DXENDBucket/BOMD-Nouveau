@@ -49,13 +49,13 @@ public final class NativePayloads {
             case PETAL -> new PetalBladeProjectile(owner, world, target -> {}, List.of(), 0);
             case COMET -> new CometProjectile(owner, world, point -> {
                 float strength = (float)Math.max(.1, BMDEntities.mobConfig.lichConfig.comet.explosionStrength + .5 * amplify);
-                dev.bomdnouveau.platform.ArsDamage.scoped(context, () -> world.explode(owner, point.x, point.y, point.z, strength,
+                dev.arsconflux.api.damage.NativeSpellDamage.during(context, () -> world.explode(owner, point.x, point.y, point.z, strength,
                         BomdConfig.terrainDamage() ? Level.ExplosionInteraction.MOB : Level.ExplosionInteraction.NONE));
             }, List.of());
             case SPORE -> new SporeBallProjectile(owner, world, hit -> hit.getEntity() != owner);
             default -> throw new IllegalArgumentException("Not a native projectile: " + ability);
         };
-        return dev.bomdnouveau.platform.ArsDamage.bind(payload,context);
+        return dev.arsconflux.api.damage.NativeSpellDamage.bind(payload,context);
     }
     /** Fresh payload per impact: repeated trajectories must not reuse a native 'already impacted' flag.
      * Landed spores are real native entities, so their flashing model survives the 30-tick delay. */

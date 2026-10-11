@@ -19,3 +19,5 @@ The native mod is a separately installed dependency, not bundled here.
 Its textures/models/sounds are referenced at runtime, not redistributed.
 
 Additional modifications (2026-10-12): Opt-in Ars equipment damage attributes and spell damage events for native payloads, explosions, ground attacks and laser hits; platform behavior generated for Forge. Native source types, effects and ordinary Boss attacks retained.
+
+Additional modifications (2026-10-12, dev.10): Native Ars damage processing delegates to the separately installed Ars Conflux 0.1.18 API; removed duplicated damage helper and explosion hook. Native adapter hooks and existing combat values retained.
