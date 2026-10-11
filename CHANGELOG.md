@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.0-dev.8
+
+- Revisit costs against level-scaled Iron spells and BOMD's existing cooldowns: Comet / Comet Burst 200 Mana; Spore Ball / Spore Burst 150; Gauntlet Laser 120 per active second (up to 360 per full beam).
+- Keep damage, Harm amplification, cooldowns, trigger payment and native behavior unchanged. Both platforms share the new defaults; existing configuration values remain user-owned.
+- Record comparison assumptions and limits in the payload audit. Verify both release distributions; no runtime suite is repeated for this numeric-only update.
+
 ## 0.1.0-dev.7
 
 - Add Minecraft 1.20.1 Forge / Ars 4 / BOMD 1.1.2 distribution with the same 11 glyphs, Conflux execution, trigger payment and active cooldown policy. Both platforms use one VERSION.

@@ -1,4 +1,51 @@
-# Native payload audit — 0.1.0-dev.7
+# Native payload audit — 0.1.0-dev.8
+
+## Current balance review — dev.8
+
+The dev.2 table below is historical. Current defaults are Comet / Comet Burst 200,
+Spore / Spore Burst 150 and Laser 120 per active second; missile/petal and all other
+costs, damage, amplification and cooldowns are unchanged. The lower fees account for
+the active cooldowns introduced in dev.6 and comparison with stronger Iron levels.
+They are tuning choices, not claims that every spell has equal damage per Mana.
+
+Comparison inputs were inspected in the installed Iron 1.21.1 3.16.3 JAR and the
+Iron & Nouveau 0.17.14 sources. Unmodified Iron damage uses
+`(basePower + powerPerLevel * (level - 1)) * genericPower * schoolPower * configPower`.
+Mana likewise grows with level. Actual resolved level includes the configured base
+level and Amplify/Dampen; the bridge does not clamp it to the native scroll maximum.
+These figures use default native configuration, no equipment, no resonance and no
+defenses; they exclude ordinary Ars carrier/augment/continuation fees.
+
+| Iron spell | Levels | Raw damage at those levels | Native trigger Mana | Native cooldown |
+| --- | --- | --- | --- | --- |
+| Magic Missile / Firebolt / Icicle | 1 / 5 / 10 | 6 / 8 / 10.5 | 10 / 18 / 28 | 1 s |
+| Fireball | 1 / 3 / 5 | 10 / 20 / 30 before distance falloff | 60 / 90 / 120 | 25 s |
+| Chain Lightning | 1 / 5 / 10 | 6 / 10 / 15 per victim | 25 / 53 / 88 | 20 s |
+| Electrocute | 1 / 5 / 10 | 1.75 / 4.75 / 8.5 per accepted pulse | 3 / 7 / 12 per pulse | 12 s |
+
+Fireball 5 uses radius 7 and squared-distance attenuation. With full line of sight,
+its ideal raw damage at distances 0 / 2 / 4 / 6 is 30 / 27.55 / 20.20 / 7.96.
+Strength-4 Comet's corresponding ideal explosion figures are 57 / 37 / 22 / 9;
+exposure, blast defenses and hit geometry can substantially lower them. Comet remains
+more expensive (200 vs 120) but carries its own 15 s cooldown. Maximum-center damage
+is not an area average and a continuous beam is not a single hit.
+
+Laser preserves vanilla hurt immunity. Equal damage is ordinarily accepted about
+every 10 ticks, so a fully exposed stationary target can receive approximately six
+18-damage hits during 60 active ticks, not merely three. This is an estimate rather
+than a guaranteed hit count or hard cap. The complete unamplified payment is now
+360 Mana, prepaid in three 120-Mana intervals; interrupted casts pay only begun
+intervals. Spore's delayed hit and poison likewise must not be multiplied by all
+149 ground columns.
+
+Ars 'n Spells 3.3.5 can route native Iron and Ars through Ars Mana (`ars_primary`)
+and enables bidirectional combat-stat bonuses. The local shared test instance uses
+that setup, with Iron & Nouveau `use_iron_mana = false`. It is an instance setting,
+not a dependency or forced behavior of BOMD & Nouveau. Equipment scaling and the
+Ars 'n Spells damage hooks need separate runtime samples before claiming matching
+growth across all BOMD, Iron and Ars payloads. The current review is static, not a
+new multiplayer or client rendering test. NeoForge and Forge share the adjusted
+defaults, but the numeric Iron reference above was inspected on NeoForge only.
 
 Target: installed BOMD NeoForge 1.3.3, source snapshot
 `1a7bd955d201d1b4d066157b8335cd967677e209`.
@@ -42,7 +89,7 @@ their 30-tick result and a 100-tick safety cleanup; native rifts cancel if the o
 
 ## Version and verification scope
 
-Only 1.21.1 NeoForge is implemented. Four projectile replacements
+Both 1.21.1 NeoForge and 1.20.1 Forge are implemented (Forge notes below). Four projectile replacements
 and seven effects have native Scribe recipes and English/Chinese localization. Glyphs
 are grouped through Core after normal Ars glyphs; projectile modifiers remain at the
 end of this provider's augments. Native icons are referenced, not copied.
