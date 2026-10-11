@@ -114,6 +114,10 @@ public final class GroundEffects {
         if (slow) target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 120, 2), owner);
     }
     private static boolean earthdive(ServerLevel world, CastContext context) {
+        // Beneficial actions may move the caster or an ally, never an unwilling target.
+        if (context.target() instanceof EntityHitResult hit && (!(hit.getEntity() instanceof LivingEntity host)
+                || host.isSpectator() || !(host == context.caster()
+                || context.caster().isAlliedTo(host) || host.isAlliedTo(context.caster())))) return false;
         var selected = context.target() instanceof EntityHitResult hit && hit.getEntity() instanceof LivingEntity living ? living : context.caster();
         if (!selected.isAlive() || selected.level() != world) return false;
         var direction = selected == context.caster() && context.target() instanceof EntityHitResult ? selected.getLookAngle() : direction(context);

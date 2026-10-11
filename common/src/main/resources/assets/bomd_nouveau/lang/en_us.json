@@ -39,5 +39,5 @@
   "ars_nouveau.augment_desc.glyph_obsidian_spikes_glyph_dampen": "Decrease damage per hit using the Harm glyph amplification value.",
   "item.bomd_nouveau.glyph_earthdive": "Earthdive",
   "bomd_nouveau.glyph_name.glyph_earthdive": "Earthdive",
-  "bomd_nouveau.glyph_desc.glyph_earthdive": "Move the selected creature through a nearby wall along the trigger direction. Self-casts use its facing. Unbreakable blocks stop passage."
+  "bomd_nouveau.glyph_desc.glyph_earthdive": "Move yourself or the selected ally through a nearby wall along the trigger direction. Self-casts use its facing. Unbreakable blocks stop passage."
 }

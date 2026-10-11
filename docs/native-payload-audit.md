@@ -120,7 +120,10 @@ the three runtime tests remain the dev.1 baseline and are not rerun for price ch
 - An activation charges once for its complete native attack sequence. Subsequent Ars
   hits activate and charge separate sequences; creative casters are exempt. No added
   chant/cooldown. Defaults are 200/300/240 Mana, plus the configured Amplify surcharge.
-- Earthdive selects a living entity or falls back to the caster. Self selection uses
+- Earthdive selects a living ally or uses the caster for a non-entity hit. Entity
+  hits are rejected unless the recipient is the caster or either entity's native
+  isAlliedTo predicate accepts the other; non-living entities and spectators are
+  rejected too. Rejected hits do not move anyone or spend Mana. Self selection uses
   that caster's facing; otherwise incoming trajectory direction takes priority, then
   the direction from caster to hit. Native WallTeleport chooses an exit, with additional
   bounding-box collision, loaded-path and world-border checks. It supports player and

@@ -192,8 +192,19 @@ public final class PayloadGameTests {
                     close(h,p.getX(),origin.x,"Native unbreakable wall prevents teleport");close(h,mana.getCurrentMana(),paid,"Failed earthdive costs no mana");
                     for(int x=1;x<=2;x++)for(int y=0;y<=3;y++)for(int z=-2;z<=2;z++)h.getLevel().setBlock(base.offset(x,y,z),Blocks.STONE.defaultBlockState(),2);
                     p.setPos(origin.add(-8,0,0));var creature=cow(h,origin);
+                    paid=mana.getCurrentMana();
                     effect(h,p,Ability.EARTHDIVE,new EntityHitResult(creature),new Vec3(1,0,0));
-                    h.assertTrue(creature.getX()>base.getX()+3 && p.getX()<origin.x,"Entity selection moves that creature rather than the caster");
+                    close(h,creature.getX(),origin.x,"Earthdive cannot move a non-allied creature");
+                    close(h,mana.getCurrentMana(),paid,"Rejected non-allied target costs no mana");
+                    var scoreboard=h.getLevel().getScoreboard();
+                    var team=scoreboard.addPlayerTeam("earthdive_"+p.getId());
+                    try {
+                        scoreboard.addPlayerToTeam(p.getScoreboardName(),team);
+                        scoreboard.addPlayerToTeam(creature.getScoreboardName(),team);
+                        effect(h,p,Ability.EARTHDIVE,new EntityHitResult(creature),new Vec3(1,0,0));
+                        h.assertTrue(creature.getX()>base.getX()+3 && p.getX()<origin.x,"Earthdive moves the selected ally rather than the caster");
+                        close(h,mana.getCurrentMana(),paid-dev.bomdnouveau.platform.BomdConfig.cost(Ability.EARTHDIVE),"Successful ally teleport charges once");
+                    } finally {scoreboard.removePlayerTeam(team);}
                     h.assertTrue(GlyphCatalog.EFFECTS.stream().filter(g->g.ability==Ability.EARTHDIVE).findFirst().orElseThrow().compatibleAugments.isEmpty(),"Earthdive does not advertise meaningless damage augments");
                     p.setPos(origin);p.setGameMode(GameType.CREATIVE);mana.setMana(0);
                     effect(h,p,Ability.EARTHDIVE,new EntityHitResult(p),Vec3.ZERO);

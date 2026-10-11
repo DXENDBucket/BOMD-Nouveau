@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.0-dev.4
+
+- Treat Earthdive as a beneficial action: only move the caster or a living ally recognized by vanilla alliance checks, never a non-allied or non-living entity target. Rejected targets do not charge Mana.
+- Extend the existing wall-teleport GameTest to cover non-allied rejection, allied movement and their resource costs.
+- All four existing focused server GameTests and release artifact checks pass with Iron / Goety coexistence.
+
 ## 0.1.0-dev.3
 
 - Add Obsidian Burst, Fire Wave, Obsidian Spikes and Earthdive effect glyphs, native Scribe recipes and English/Chinese descriptions.
