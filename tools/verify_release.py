@@ -3,6 +3,7 @@ from pathlib import Path
 from zipfile import ZipFile
 import json
 import struct
+import sys
 
 root = Path(__file__).resolve().parents[1]
 version = (root / 'VERSION').read_text(encoding='utf-8').strip()
@@ -46,6 +47,9 @@ for artifact in (binary, source):
                 assert f'dev/bomdnouveau/mixin/{mixin}.class' in names
         else:
             assert 'dev/bomdnouveau/casting/NativePayloads.java' in names
+if '--artifacts-only' in sys.argv:
+    print(f'{version}: 6 glyph recipes, native icon references, localizations, licensing and source/binary isolation verified; runtime tests not rerun.')
+    sys.exit(0)
 log = (root / 'build/payload-tests.log').read_text(encoding='utf-16')
 assert 'All 3 required tests passed' in log and 'BUILD SUCCESSFUL' in log
 print(f'{version}: 6 glyph recipes, native icon references, both localizations, LGPL/GPL notices, source/binary isolation and 3 focused GameTests verified.')

@@ -123,7 +123,7 @@ public final class PayloadGameTests {
             var cometVisual=h.getLevel().getEntitiesOfClass(com.cerbon.bosses_of_mass_destruction.projectile.comet.CometProjectile.class,new AABB(scene(h),scene(h)).inflate(24)).get(0);
             cometVisual.hurt(h.getLevel().damageSources().playerAttack(p),1);
             h.assertTrue(cometVisual.isRemoved() && orbitComet.isRemoved() && shootDownMarker.hits==1,"Native shoot-down resolves and removes the carrier");
-            close(h,mana.getCurrentMana(),9900,"Shoot-down pays repeated projectile fee instead of bypassing billing");
+            close(h,mana.getCurrentMana(),10000-BomdResources.quote(cometCast.spellContext,Ability.COMET,List.of()).amount(),"Shoot-down pays repeated projectile fee instead of bypassing billing");
             clean(h,p);mana.setMana(0);
             var cast=resolver(h,p,new Spell(MethodProjectile.INSTANCE,GlyphCatalog.PROJECTILES.get(0)));cast.spellContext.nextPart();
             var unfunded=new EntityProjectileSpell(h.getLevel(),cast);unfunded.setPos(scene(h));
@@ -142,7 +142,7 @@ public final class PayloadGameTests {
         var glyph=GlyphCatalog.EFFECTS.stream().filter(g->g.ability==Ability.SPORE_BURST).findFirst().orElseThrow();
         var cast=resolver(h,p,new Spell(MethodTouch.INSTANCE,glyph));cast.spellContext.nextPart();
         cast.onResolveEffect(h.getLevel(),block(center));
-        close(h,mana.getCurrentMana(),10000-70,"Independent spore effect uses the same native payload and its own fee");
+        close(h,mana.getCurrentMana(),10000-BomdResources.quote(cast.spellContext,Ability.SPORE_BURST,List.of()).amount(),"Independent spore effect uses the same native payload and its own fee");
         h.runAfterDelay(45,()->{
             try {
                 h.assertTrue(victim.getHealth()<before && victim.hasEffect(MobEffects.POISON),"Delayed native spore eruption retains actual damage and poison");
@@ -150,7 +150,7 @@ public final class PayloadGameTests {
                 var target=cow(h,center.add(0,1,0));var blast=GlyphCatalog.EFFECTS.stream().filter(g->g.ability==Ability.COMET_BURST).findFirst().orElseThrow();
                 mana.setMana(10000);var explode=resolver(h,p,new Spell(MethodTouch.INSTANCE,blast));explode.spellContext.nextPart();explode.onResolveEffect(h.getLevel(),block(center));
                 h.assertTrue(target.getHealth()<500,"Independent comet effect preserves actual native explosion damage");
-                close(h,mana.getCurrentMana(),10000-80,"Independent explosion cost");
+                close(h,mana.getCurrentMana(),10000-BomdResources.quote(explode.spellContext,Ability.COMET_BURST,List.of()).amount(),"Independent explosion cost");
                 h.assertTrue(h.getLevel().getBlockState(BlockPos.containing(center).below()).is(Blocks.STONE),"Default comet explosion preserves terrain");
                 for(var part:GlyphCatalog.ALL) h.assertTrue(h.getLevel().getRecipeManager().byKey(part.getRegistryName()).isPresent(),"Every glyph has a real native Scribe recipe");
                 h.succeed();

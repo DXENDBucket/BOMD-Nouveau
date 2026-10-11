@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.0-dev.2
+
+- Raise both Lich Comet and Comet Burst default payload costs to 300 Mana to account for their native area explosion damage and lack of added cast time/cooldown.
+- Raise both Spore Ball and Spore Burst default payload costs to 200 Mana for the native radius-7 ground eruption, shield piercing and poison. Keep all native payload damage unchanged.
+
 ## 0.1.0-dev.1
 
 - Add Lich Missile, Petal Blade, Lich Comet and Spore Ball projectile replacements, with native impacts and Ars/Conflux trajectories.

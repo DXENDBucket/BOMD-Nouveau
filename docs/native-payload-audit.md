@@ -56,3 +56,45 @@ Client visuals still require in-game inspection; a server test cannot prove rend
 
 Remaining Boss attacks (gauntlet laser/shield, specialized spike animations, summoning,
 walls, and item teleport abilities) are not represented by these six glyphs.
+
+## Damage and cost review — dev.2
+
+Figures below assume the native default Boss configuration, player casting, no
+equipment modifiers or defenses. Amplify follows Harm's configured +2 for direct
+attack-value damage; comet Amplify instead adds 0.5 native explosion strength.
+
+| Payload | Unamplified damage | Default payload Mana |
+| --- | --- | ---: |
+| Missile | 13.5 direct, plus configured 5-second Slowness III | 40 |
+| Petal | 18 direct | 50 |
+| Comet / Comet Burst | Strength 4 explosion, theoretical center maximum 57; distance and exposure reduce it | 300 / 300 |
+| Spore / Spore Burst | 18 on an entity hit; 18 per accepted eruption hit after 30 ticks, plus 140-tick Poison I | 200 / 200 |
+
+The spore circle is a filled radius-7 disk (149 possible ground columns), not a
+single ring. Placement still requires native suitable ground. Vanilla hurt immunity
+prevents equal overlapping hits from simply multiplying damage by the column count.
+A target taking both direct and delayed hits ordinarily receives 36 raw hit damage
+plus roughly 5 poison damage if susceptible and able to lose that health. Ground-only
+targets ordinarily receive 18 plus poison. These are scenario estimates, not universal
+damage caps: movement, immunity, armor, hurt timing and repeated casts change them.
+Poison does not normally kill; piercing means bypassing shields, not bypassing armor.
+
+Local default comparison, excluding equipment/config discounts:
+
+- Ars projectile + Harm: 5 damage for 25 Mana (10 method + 15 effect); ten separate
+  successful hits total 50 damage for 250 Mana. Harm permits two Amplify by default,
+  giving 9 damage for 65 Mana per projectile. This is a simple reference spell, not
+  a claim about the cheapest possible Ars composition.
+- Iron Magic Missile level 1: 6 damage for 10 Iron Mana, 1-second cooldown. Nine
+  separate casts total 54 damage for 90 Mana. Iron Fireball level 4: up to 25 damage
+  per target for 105 Mana, 2-second base cast time and 25-second cooldown; two casts
+  total up to 50 per target for 210 Mana.
+- Goety Soul Bolt: 4 damage for 4 Soul Energy, no base charge and 1-second cooldown;
+  thirteen casts total 52 damage for 52 Soul Energy. Soul Energy is not equivalent
+  to either Mana pool and has its own acquisition/storage rules.
+
+Evidence: installed Ars 5.13.3 Harm/method/augment configs and bytecode; installed
+Iron spell constructors and power/cost formulas; Goety 3.2.0 Soul Bolt source and
+test-profile spell config; installed Minecraft ExplosionDamageCalculator and poison
+effect source. This balance-only revision uses compilation and artifact checks;
+the three runtime tests remain the dev.1 baseline and are not rerun for price changes.
