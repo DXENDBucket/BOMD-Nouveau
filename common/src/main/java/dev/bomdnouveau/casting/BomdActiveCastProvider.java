@@ -16,7 +16,7 @@ import java.util.Locale;
 
 /** Only new active uses are gated. Hit callbacks, scatter branches and ongoing beams are untouched. */
 public final class BomdActiveCastProvider implements ActiveCastProvider {
-    public static void register() { ActiveCasts.register(CarrierRegistry.id("bomd_nouveau:active_casting"), new BomdActiveCastProvider()); }
+    public static void register() { BomdCooldowns.register(); ActiveCasts.register(CarrierRegistry.id("bomd_nouveau:active_casting"), new BomdActiveCastProvider()); }
     private static EnumSet<Ability> abilities(List<Spell> recipes) {
         var result = EnumSet.noneOf(Ability.class);
         for (var recipe : recipes) for (var part : ArsSpellAccess.parts(recipe)) {
