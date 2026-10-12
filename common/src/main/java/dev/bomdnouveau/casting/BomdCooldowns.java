@@ -15,7 +15,7 @@ public final class BomdCooldowns {
     private static final String KEY = "bomd_nouveau_cooldowns";
     private static long now(LivingEntity actor) { return actor.level().getServer().overworld().getGameTime(); }
     private static boolean applies(LivingEntity actor) {
-        return actor != null && actor.level() instanceof ServerLevel && BomdConfig.cooldownsEnabled()
+        return actor != null && actor.level() instanceof ServerLevel && BomdConfig.cooldownsEnabled() && ActiveCasts.cooldownsEnabled(actor)
                 && (!(actor instanceof Player player) || !player.isCreative() || BomdConfig.creativeCooldown());
     }
     public static long remaining(LivingEntity actor, Ability ability) {

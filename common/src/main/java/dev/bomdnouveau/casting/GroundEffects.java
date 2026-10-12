@@ -116,11 +116,10 @@ public final class GroundEffects {
     private static boolean earthdive(ServerLevel world, CastContext context) {
         // Beneficial actions may move the caster or an ally, never an unwilling target.
         if (context.target() instanceof EntityHitResult hit && (!(hit.getEntity() instanceof LivingEntity host)
-                || host.isSpectator() || !(host == context.caster()
-                || context.caster().isAlliedTo(host) || host.isAlliedTo(context.caster())))) return false;
+                || host.isSpectator() || !dev.arsconflux.api.targeting.Allies.areAllies(context.caster(), host))) return false;
         var selected = context.target() instanceof EntityHitResult hit && hit.getEntity() instanceof LivingEntity living ? living : context.caster();
         if (!selected.isAlive() || selected.level() != world) return false;
-        var direction = selected == context.caster() && context.target() instanceof EntityHitResult ? selected.getLookAngle() : direction(context);
+        var direction = context.target() instanceof EntityHitResult ? selected.getLookAngle() : direction(context);
         if (direction.lengthSqr() < 1.0e-8) return false;
         var eye = selected.getEyePosition();
         // Native wall search reads up to 23 blocks; never request an unloaded chunk.

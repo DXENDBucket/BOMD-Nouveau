@@ -28,6 +28,19 @@ import java.util.*;
 
 @GameTestHolder("bomd_nouveau") @PrefixGameTestTemplate(false)
 public final class PayloadGameTests {
+    @GameTest(template="empty",timeoutTicks=50)
+    public static void externalAllyUsesItsOwnEarthdiveDirection(GameTestHelper h) throws Exception {
+        var p=player(h);var origin=scene(h);var host=cow(h,origin);host.setYRot(-90);host.setXRot(0);
+        var relation=dev.arsconflux.api.targeting.Allies.register(CarrierRegistry.id("audit_fixture:"+p.getUUID()),(a,b)->a==p&&b==host);
+        try {
+            h.assertTrue(GauntletLaser.allied(p,host),"Laser accepts an external Core alliance");
+            var base=BlockPos.containing(origin);
+            for(int x=1;x<=2;x++)for(int y=0;y<=3;y++)for(int z=-2;z<=2;z++)h.getLevel().setBlock(base.offset(x,y,z),Blocks.STONE.defaultBlockState(),2);
+            effect(h,p,Ability.EARTHDIVE,new EntityHitResult(host),new Vec3(-1,0,0));
+            h.assertTrue(host.getX()>base.getX()+3,"Ally steps along its own east-facing look, ignoring the westbound projectile");
+            h.succeed();
+        } finally {relation.close();host.discard();p.discard();ExecutionSessions.tick();}
+    }
     private static Vec3 scene(GameTestHelper h) {
         var origin = h.absoluteVec(new Vec3(4,0,4));
         return new Vec3(origin.x, h.getLevel().getMaxBuildHeight()-48, origin.z);
@@ -201,7 +214,8 @@ public final class PayloadGameTests {
                     try {
                         scoreboard.addPlayerToTeam(p.getScoreboardName(),team);
                         scoreboard.addPlayerToTeam(creature.getScoreboardName(),team);
-                        effect(h,p,Ability.EARTHDIVE,new EntityHitResult(creature),new Vec3(1,0,0));
+                        creature.setYRot(-90);creature.setXRot(0);
+                        effect(h,p,Ability.EARTHDIVE,new EntityHitResult(creature),new Vec3(-1,0,0));
                         h.assertTrue(creature.getX()>base.getX()+3 && p.getX()<origin.x,"Earthdive moves the selected ally rather than the caster");
                         close(h,mana.getCurrentMana(),paid-dev.bomdnouveau.platform.BomdConfig.cost(Ability.EARTHDIVE),"Successful ally teleport charges once");
                     } finally {scoreboard.removePlayerTeam(team);}

@@ -41,7 +41,7 @@ public final class GauntletLaser implements ExecutionDriver<GauntletLaser.Pose> 
     private Vec3 lastOrigin, lastEnd, lastDirection;
     private GauntletLaser(float damage, ResourceCharge charge) { this.damage = damage; this.charge = charge; }
     public static boolean allied(LivingEntity caster, LivingEntity host) {
-        return caster == host || caster.isAlliedTo(host) || host.isAlliedTo(caster);
+        return dev.arsconflux.api.targeting.Allies.areAllies(caster, host);
     }
     public static boolean start(ServerLevel world, CastContext frame, double amplify, ResourceCharge charge) {
         LivingEntity anchor = null;
@@ -54,7 +54,7 @@ public final class GauntletLaser implements ExecutionDriver<GauntletLaser.Pose> 
         float damage = (float)Math.max(0, BMDEntities.mobConfig.gauntletConfig.attack * .75 * 1.5
                 + NativePayloads.amplification() * amplify);
         var driver = new GauntletLaser(damage, charge);
-        var session = new ExecutionSession<>(world, frame.withExecutor(anchor == null ? frame.caster() : anchor)
+        var session = new ExecutionSession<>(world, frame.withExecutor(anchor)
                 .withAccount(charge.account()), pose, CHARGE_TICKS + ACTIVE_TICKS, driver, hit -> {},
                 () -> pose.valid(world, frame.caster()) && dev.bomdnouveau.GlyphCatalog.EFFECTS.stream()
                         .filter(g -> g.ability == Ability.GAUNTLET_LASER).findFirst().orElseThrow().isEnabled(), ExecutionScope.DIRECT);
