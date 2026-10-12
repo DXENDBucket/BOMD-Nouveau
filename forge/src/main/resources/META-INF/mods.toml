@@ -28,7 +28,7 @@ side="BOTH"
 [[dependencies.bomd_nouveau]]
 modId="ars_conflux"
 mandatory=true
-versionRange="[0.1.23,0.2)"
+versionRange="[0.1.24,0.2)"
 ordering="AFTER"
 side="BOTH"
 [[dependencies.bomd_nouveau]]

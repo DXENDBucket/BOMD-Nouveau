@@ -34,7 +34,7 @@ minecraft {
         server { workingDirectory project.file('run/server'); args '--nogui'; mods { ars_conflux { source confluxMain }; bomd_nouveau { source sourceSets.main } } }
         gameTestServer {
             workingDirectory project.file('run/gametest')
-            property 'forge.enabledGameTestNamespaces', 'bomd_nouveau'
+            property 'forge.enabledGameTestNamespaces', providers.gradleProperty('gameTestNamespaces').getOrElse('bomd_nouveau')
             jvmArgs '-Xmx2G'
             mods { ars_conflux { source confluxMain }; bomd_nouveau { source sourceSets.main; source sourceSets.gameTest } }
         }

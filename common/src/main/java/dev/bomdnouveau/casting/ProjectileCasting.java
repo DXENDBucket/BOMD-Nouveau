@@ -57,8 +57,10 @@ public final class ProjectileCasting {
                 state.bomdNouveau$resolving(true);
                 try {
                     if (!session.activate(() -> {
-                        NativePayloads.impact(ability, session.world(), session.context().withTarget(hit), hit, state.bomdNouveau$damage(), amplify);
-                        session.impact(hit);
+                        boolean continued=dev.arsconflux.api.projectile.ImpactTriggers.resolve(hit,
+                                dev.arsconflux.api.projectile.ImpactTriggers.Policy.ENTITY_DAMAGE,
+                                () -> NativePayloads.impact(ability, session.world(), session.context().withTarget(hit), hit, state.bomdNouveau$damage(), amplify));
+                        if(continued) session.impact(hit);
                         return true;
                     })) session.finish(ExecutionSession.EndReason.DENIED);
                 } finally { state.bomdNouveau$resolving(false); }

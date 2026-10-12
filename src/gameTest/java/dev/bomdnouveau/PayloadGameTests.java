@@ -420,6 +420,25 @@ public final class PayloadGameTests {
             h.succeed();
         } finally {net.neoforged.neoforge.common.NeoForge.EVENT_BUS.unregister(pre);net.neoforged.neoforge.common.NeoForge.EVENT_BUS.unregister(post);clean(h,p);p.discard();}
     }
+    public static void failedNativeContactsDoNotContinue(GameTestHelper h) {
+        var p=player(h);
+        try {
+            for(var glyph:GlyphCatalog.PROJECTILES) {
+                clean(h,p);CapabilityRegistry.getMana(p).setMana(10000);var marker=new Marker();
+                var cast=resolver(h,p,new Spell(MethodProjectile.INSTANCE,glyph,marker));cast.spellContext.nextPart();
+                var carrier=new EntityOrbitProjectile(h.getLevel(),cast,p);carrier.setPos(scene(h).add(0,2,0));
+                h.assertTrue(ProjectileDispatch.convert(carrier),"Real repeating projectile dispatch");
+                var target=cow(h,scene(h).add(0,0,3));var hit=new EntityHitResult(target);
+                var callback=ArsSpellAccess.resolver(carrier);callback.onResolveEffect(h.getLevel(),hit);
+                h.assertTrue(marker.hits==1,"Accepted native hit continues: "+glyph.ability);
+                callback.onResolveEffect(h.getLevel(),hit);h.assertTrue(marker.hits==1,"Equal invulnerable hit does not continue: "+glyph.ability);
+                callback.onResolveEffect(h.getLevel(),block(scene(h).add(0,0,4)));
+                h.assertTrue(marker.hits==2,"Block aftermath continues: "+glyph.ability);
+                if(glyph.ability==Ability.SPORE)h.assertTrue(!h.getLevel().getEntitiesOfClass(SporeBallProjectile.class,new AABB(scene(h),scene(h)).inflate(12),e->e.impacted).isEmpty(),"Native delayed spores survive rejected direct hurt");
+            }
+            h.succeed();
+        } finally {clean(h,p);p.discard();ExecutionSessions.tick();}
+    }
     private static final class Marker extends AbstractEffect {
         int hits;
         Marker(){super(CarrierRegistry.id("bomd_nouveau:glyph_test_marker"),"Marker");}

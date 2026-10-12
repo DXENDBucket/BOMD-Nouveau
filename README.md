@@ -1,7 +1,7 @@
 # BOMD & Nouveau
 
 把 Bosses of Mass Destruction 的攻击能力编排为 Ars Nouveau 魔符。
-当前是 **0.1.0-dev.12**，支持 **Minecraft 1.21.1 / NeoForge** 和 **Minecraft 1.20.1 / Forge**。
+当前是 **0.1.0-dev.13**，支持 **Minecraft 1.21.1 / NeoForge** 和 **Minecraft 1.20.1 / Forge**。
 Mod ID：`bomd_nouveau`。作者 EndXiom，许可 **LGPL v3**。
 
 需要 Ars Nouveau、Ars Conflux 0.1.18，以及对应版本的 BOMD 和它们自己的前置。
@@ -117,4 +117,8 @@ NeoForge 和 Forge 的伤害规则共享设计。平台事件总线及属性 Hol
 
 自定义冷却接入 Conflux 0.1.23 的公共持久记录与重生规则，读取既有存档字段。 详见 [交接](docs/cooldown-lifecycle.md)。
 
-当前此版本最低依赖 Ars Conflux **0.1.23**；上文历史版本记录不代表当前最低要求。
+当前此版本最低依赖 Ars Conflux **0.1.24**；上文历史版本记录不代表当前最低要求。
+
+## 弹射物后续触发（0.1.0-dev.13）
+
+当前版本需要 Ars Conflux **0.1.24**。直接伤害弹体命中实体时，只有原生伤害成功才续接剩余编排；方块命中、纯状态或区域成功建立仍可续接。原生特效、生命周期及现有费用规则保留。详见 [接入记录](docs/projectile-impact-triggers.md)。

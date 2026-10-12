@@ -25,7 +25,7 @@ neoForge {
         gameTestServer {
             type = 'gameTestServer'
             gameDirectory = file('run/gametest')
-            systemProperty 'neoforge.enabledGameTestNamespaces', 'bomd_nouveau'
+            systemProperty 'neoforge.enabledGameTestNamespaces', providers.gradleProperty('gameTestNamespaces').getOrElse('bomd_nouveau')
             jvmArgument '-Xmx2G'
         }
     }
